@@ -1,0 +1,10 @@
+
+
+gamepad library
+https://github.com/piborg/Gamepad
+
+
+sounds 
+https://github.com/hug33k/PyTalk-R2D2
+
+
