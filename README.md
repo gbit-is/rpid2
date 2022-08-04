@@ -5,6 +5,7 @@ The code is very much in the proof of concept stage as is
 
 # Features 
 
+
 ## Somewhat ready
 
 - Use *any* usb controller (I am using a cheap Trust GXT545)
@@ -29,3 +30,8 @@ I decided to start with reading a bit on threading in python and get some basic 
 - I am using [This shield](https://thepihut.com/products/gpio-screw-terminal-hat) to expand the reach of the GPIO's
 - I am using [this shield](https://thepihut.com/products/16-channel-servo-driver-hat-for-raspberry-pi-12-bit-i2c) to control the Servos 
 - 12v speakers from the trash I hooked up to the headphone jack of the pi 
+
+
+# Rough mockup of logic flow
+
+![image](https://user-images.githubusercontent.com/34913299/182890060-4bfeab03-816e-4f9b-a3da-a6fc3891931c.png)
