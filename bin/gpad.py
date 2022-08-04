@@ -21,14 +21,14 @@ deadZone = float(config["gamepad"]["deadZone"])
 turnMultiplier = float(config["gamepad"]["turnMultiplier"])
 steeringDivider = float(config["gamepad"]["steeringDivider"])
 speedDivider = float(config["gamepad"]["speedDivider"])
-socketPath = config["sockets"]["main_motors"]
+mainMotorSocket = config["sockets"]["main_motors"]
 
 
 speed = 0.0
 steering = 0.0
 
 
-def connectToSocket():
+def connectToSocket(socketPath):
 	try:
 		client = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 		client.connect(socketPath)
@@ -38,7 +38,6 @@ def connectToSocket():
 		return False
 
 def sendToSocket(client,message):
-	#print(message)
 	msg = json.dumps(message).encode()
 	client.send(msg)
 
@@ -73,13 +72,13 @@ def pollGamepad(gamepad):
 	
 
 
-if __name__ == "__main__":
+def manage_gamepad():
 
-	client = False
+	motorClient = False
 	print("connecting to socket")
-	while not client:
-		client = connectToSocket()
-		if not client:
+	while not motorClient:
+		motorClient = connectToSocket(mainMotorSocket)
+		if not motorClient:
 			time.sleep(1)
 
 	print("Connected to socket")
@@ -94,10 +93,13 @@ if __name__ == "__main__":
 				"Y_axis" : axis[0]
 			}
 			try:
-				sendToSocket(client,message)
+				sendToSocket(motorClient,message)
 			except:
-				client = connectToSocket()
+				motorClient = connectToSocket(mainMotorSocket)
 			time.sleep(pollInterval)
 
 	except KeyboardInterrupt:
 		gamepad.disconnect()
+if __name__ == "__main__":
+	while True:
+		manage_gamepad()

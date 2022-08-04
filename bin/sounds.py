@@ -1,10 +1,15 @@
 import os
 import random
 import time
+import threading
 
 
 NOSOUND = False
-#NOSOUND = True
+NOSOUND = True
+
+from init import *
+config = init_config()
+
 
 
 rootDir = os.path.dirname(os.path.dirname(__file__))
@@ -38,14 +43,44 @@ def randomSound(low=3,high=10):
 
 
 
-def soundGen():
-	while True:
-		print("make sound")
+def sound_loop_thread():
+
+
+	kvs = init_kvs()
+
+	audio_loop_enabled = kvs["audio_loop_enabled"].decode()
+
+	while audio_loop_enabled == "True":
 		randomSound()
-		sTime = random.randint(5,18)
+		kvs = init_kvs()
+		
+		audio_loop_interval_low = int(kvs["audio_loop_interval_low"].decode())
+		audio_loop_interval_high = int(kvs["audio_loop_interval_high"].decode())
+
+		sTime = random.randint(audio_loop_interval_low,audio_loop_interval_high)
+
 		print("Sleeping for: " + str(sTime) + " seconds")
 		time.sleep(sTime)
+		audio_loop_enabled = kvs["audio_loop_enabled"].decode()
+
 		
 
 if __name__ == "__main__":
-	soundGen()
+
+	while True:
+
+
+		kvs = init_kvs()
+		isRunning = False
+
+	
+
+		
+	
+		audio_loop_enabled = kvs["audio_loop_enabled"].decode()	
+		if audio_loop_enabled == "True":
+			sound_loop_thread()
+	
+		time.sleep(3)
+
+
