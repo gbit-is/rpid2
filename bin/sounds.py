@@ -5,7 +5,7 @@ import threading
 
 
 NOSOUND = False
-NOSOUND = True
+#NOSOUND = True
 
 from init import *
 config = init_config()

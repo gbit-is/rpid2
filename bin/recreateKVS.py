@@ -1,8 +1,12 @@
 
 def createKVS():
 	import dbm
+	import configparser
 	kvs = dbm.open('kvs', 'n')
 	
+	config = configparser.ConfigParser()
+	config.read('../rpid2.conf')
+
 	## Audio
 
 	kvs["audio_loop_enabled"] = config["audio"]["loop"]	
