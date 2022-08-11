@@ -2,3 +2,4 @@ __pycache__
 .vault
 *.swp
 kvs.db
+*.py_*

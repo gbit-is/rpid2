@@ -8,39 +8,52 @@ steering_multiplier = float(config["mainmotors"]["steering_multiplier"])
 speed_multiplier = float(config["mainmotors"]["speed_multiplier"])
 rotate_multiplier = float(config["mainmotors"]["rotate_multiplier"])
 
+DEBUG = False
+DEBUG = True
+
+
+def debug(msg):
+	if DEBUG:
+		print(msg)
+
 
 def set_motor_gpios():
 
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(int(config["mainmotors"]["left_pin_a"]),GPIO.OUT)
-	GPIO.setup(int(config["mainmotors"]["left_pin_b"]),GPIO.OUT)
-	GPIO.setup(int(config["mainmotors"]["right_pin_a"]),GPIO.OUT)
-	GPIO.setup(int(config["mainmotors"]["right_pin_b"]),GPIO.OUT)
+	GPIO.setup(int(config["mainmotors"]["left_pin_pwm"]),GPIO.OUT)
+	GPIO.setup(int(config["mainmotors"]["left_pin_dir"]),GPIO.OUT,initial=0)
+
+	GPIO.setup(int(config["mainmotors"]["right_pin_pwm"]),GPIO.OUT)
+	GPIO.setup(int(config["mainmotors"]["right_pin_dir"]),GPIO.OUT,initial=0)
 
 
 	pwm_freq = int(config["mainmotors"]["pwm_freq"])
 
-	m1_a = GPIO.PWM(int(config["mainmotors"]["left_pin_a"]),pwm_freq)
-	m1_b = GPIO.PWM(int(config["mainmotors"]["left_pin_b"]),pwm_freq)
-	m2_a = GPIO.PWM(int(config["mainmotors"]["right_pin_a"]),pwm_freq)
-	m2_b = GPIO.PWM(int(config["mainmotors"]["right_pin_b"]),pwm_freq)
+	left_motor_pwm  = GPIO.PWM(int(config["mainmotors"]["left_pin_pwm"]),pwm_freq)
+	right_motor_pwm = GPIO.PWM(int(config["mainmotors"]["right_pin_pwm"]),pwm_freq)
+	
+	left_motor_dir  = int(config["mainmotors"]["left_pin_dir"])
+	right_motor_dir = int(config["mainmotors"]["right_pin_dir"])
 
-	m1_a.start(0)
-	m1_b.start(0)
-	m2_a.start(0)
-	m2_b.start(0)
 
-	return m1_a,m1_b,m2_a,m2_b
-def cleanup_motor_gpios(m1_a,m1_b,m2_a,m2_b):
-	m1_a.stop()
-	m1_b.stop()
-	m2_a.stop()
-	m2_b.stop()
+	left_motor_pwm.start(0)
+	right_motor_pwm.start(0)
+	
+
+	return [ left_motor_pwm,left_motor_dir,right_motor_pwm,right_motor_dir ]
+
+def cleanup_motor_gpios(motorPins):
+
+	for pin in motorPins:
+		pin.stop()
+
 	GPIO.cleanup()
 
 
-def runMotor(X_axis,Y_axis,m1_a,m1_b,m2_a,m2_b):
-	
+def runMotor(X_axis,Y_axis,motorPins):
+
+	left_motor_pwm,left_motor_dir,right_motor_pwm,right_motor_dir = motorPins
+
 	# X_axis (-100) - (+100) left to right, 0 = center
 	# Y_axis (-100) - (+100) back to front, 0 = center
 
@@ -57,81 +70,89 @@ def runMotor(X_axis,Y_axis,m1_a,m1_b,m2_a,m2_b):
 		Y_axis_abs = 100
 
 	if X_axis_abs + Y_axis_abs == 0:
-		m1_a.ChangeDutyCycle(0)
-		m1_b.ChangeDutyCycle(0)
-		m2_a.ChangeDutyCycle(0)
-		m2_b.ChangeDutyCycle(0)
-		#print("zero zero recieved. stopping motors")
+		left_motor_pwm.ChangeDutyCycle(0)
+		right_motor_pwm.ChangeDutyCycle(0)
+		GPIO.output(left_motor_dir, 0)
+		GPIO.output(right_motor_dir, 0)
+		#debug("zero zero recieved. stopping motors")
 		return
 
 
 	if X_axis == 0:
 		# no turning, just forwards/backwards
 		if Y_axis > 0:
-			print("forwards")
-			m1_a.ChangeDutyCycle(0)
-			m1_b.ChangeDutyCycle(Y_axis_abs)
-			m2_a.ChangeDutyCycle(0)
-			m2_b.ChangeDutyCycle(Y_axis_abs)
+			left_direction = 1
+			right_direction = 1
+			debug("forwards")
 		else:
-			print("backwards")
-			m1_a.ChangeDutyCycle(Y_axis_abs)
-			m1_b.ChangeDutyCycle(0)
-			m2_a.ChangeDutyCycle(Y_axis_abs)
-			m2_b.ChangeDutyCycle(0)
+			debug("backwards")
+			left_direction = 0
+			right_direction = 0
+
+		GPIO.output(left_motor_dir, left_direction)
+		GPIO.output(right_motor_dir, right_direction)
+		left_motor_pwm.ChangeDutyCycle(Y_axis_abs)	
+		right_motor_pwm.ChangeDutyCycle(Y_axis_abs)	
+
 	elif Y_axis == 0:
 		# rotate on the spot
 
 		X_axis_abs = ( abs(X_axis) * power_multiplier ) * rotate_multiplier
 		
 		if X_axis > 0:
-			print("rotate right")
-			m1_a.ChangeDutyCycle(X_axis_abs)
-			m1_b.ChangeDutyCycle(0)
+			debug("rotate right")
+			left_direction = 1	
+			right_direction = 0	
 
-			m2_a.ChangeDutyCycle(0)
-			m2_b.ChangeDutyCycle(X_axis_abs)
 		else:	
-			print("rotate left")
-			m1_a.ChangeDutyCycle(0)
-			m1_b.ChangeDutyCycle(X_axis_abs)
+			debug("rotate left")
+			left_direction = 0	
+			right_direction = 1	
+
+		GPIO.output(left_motor_dir, left_direction)
+		GPIO.output(right_motor_dir, right_direction)
+		left_motor_pwm.ChangeDutyCycle(X_axis_abs)
+		right_motor_pwm.ChangeDutyCycle(X_axis_abs)
 	
-			m2_a.ChangeDutyCycle(X_axis_abs)
-			m2_b.ChangeDutyCycle(0)
-		
-	# X_axis (-100) - (+100) left to right, 0 = center
-	# Y_axis (-100) - (+100) back to front, 0 = center
 
 	else:
 		# complex movement
-		print("complex")
+		debug("complex")
 		if Y_axis > 0:
-			leftTire = Y_axis_abs - X_axis_abs
-			rightTire = Y_axis_abs
-			if leftTire < 0:
-				leftTire = 0
+			debug("cplex: rightish")	
+			leftTire_pwm_value = Y_axis_abs - X_axis_abs
+			rightTire_pwm_value = Y_axis_abs
+			if leftTire_pwm_value < 0:
+				leftTire_pwm_value = 0
 		else:
-			rightTire = Y_axis_abs - X_axis_abs
-			leftTire = Y_axis_abs
-			if rightTire < 0:
-				rightTire = 0
+			debug("cplex: leftish")	
+			rightTire_pwm_value = Y_axis_abs - X_axis_abs
+			leftTire_pwm_value = Y_axis_abs
+			if rightTire_pwm_value < 0:
+				rightTire_pwm_value = 0
 			
 		if X_axis > 0:	
-			m1_a.ChangeDutyCycle(0)
-			m1_b.ChangeDutyCycle(leftTire)
-			m2_a.ChangeDutyCycle(0)
-			m2_b.ChangeDutyCycle(rightTire)
+			left_direction = 1
+			right_direction = 1
+			debug("cplex: forwardish")
 
 		else:
-			m1_a.ChangeDutyCycle(leftTire)
-			m1_b.ChangeDutyCycle(0)
-			m2_a.ChangeDutyCycle(rightTire)
-			m2_b.ChangeDutyCycle(0)
+			debug("cplex: backwardish")
+			left_direction = 0
+			right_direction = 0
 
+		GPIO.output(left_motor_dir, left_direction)
+		GPIO.output(right_motor_dir, right_direction)
+		left_motor_pwm.ChangeDutyCycle(leftTire_pwm_value)
+		right_motor_pwm.ChangeDutyCycle(rightTire_pwm_value)
 
 
 if __name__ == "__main__":
-	m1_a,m1_b,m2_a,m2_b = set_motor_gpios()
-	runMotor(8.2,-7,m1_a,m1_b,m2_a,m2_b)
-	time.sleep(2)
-	cleanup_motor_gpios(m1_a,m1_b,m2_a,m2_b)
+
+	motorPins = set_motor_gpios()
+	try:
+		runMotor(0,-30,motorPins)
+	except Exception as e:
+		print(e)
+	time.sleep(0.5)
+	cleanup_motor_gpios([motorPins[0],motorPins[2]])

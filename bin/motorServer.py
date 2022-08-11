@@ -10,7 +10,8 @@ import json
 
 from motors import *
 
-m1_a,m1_b,m2_a,m2_b = set_motor_gpios()
+motorPins = set_motor_gpios()
+left_motor_pwm,left_motor_dir,right_motor_pwm,right_motor_dir = motorPins
 
 
 socketPath = config["sockets"]["main_motors"]
@@ -40,15 +41,12 @@ while True:
 	ready = select.select([server], [], [], timeout_in_seconds)
 	if ready[0]:
 		data = server.recv(4096).decode()
-		#runMotor(-10,0,m1_a,m1_b,m2_a,m2_b)
-		#time.sleep(2)
-		#cleanup_motor_gpios(m1_a,m1_b,m2_a,m2_b)
 
 
 		try:
 			data = json.loads(data)
-			#print(data)
-			runMotor(data["X_axis"],data["Y_axis"],m1_a,m1_b,m2_a,m2_b)
+			print(data)
+			runMotor(data["X_axis"],data["Y_axis"],motorPins)
 
 		
 		except Exception as e:
@@ -70,7 +68,7 @@ while True:
 		if noContact_count > noContact_max:
 			print("no contact recieved for "  + str(noContact_max) + " pulls")
 			print("sending stop to motor")
-			runMotor(0,0,m1_a,m1_b,m2_a,m2_b)
+			runMotor(0,0,motorPins)
 			noContact_count = 0
 
 	#print(noContact_count)
@@ -78,4 +76,4 @@ while True:
 
 server.close()
 os.remove(socketPath)
-cleanup_motor_gpios(m1_a,m1_b,m2_a,m2_b)
+cleanup_motor_gpios(left_motor_pwm,right_motor_pwm)
