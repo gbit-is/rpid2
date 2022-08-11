@@ -1,7 +1,30 @@
-from flask import Flask,request
+from flask import Flask,request,render_template
 from init import *
+config = init_config()
 kvs = init_kvs() # initalise KVS, make sure the KVS is populated 
 
+
+def validateKvsValue(key,value):
+
+	if key in config["kvs_variables"]:
+		valueType = config["kvs_variables"][key]
+			
+		if valueType == "bool":
+			if value in [ "True","False" ]:
+				return True
+			else:
+				return False
+
+
+		elif valueType == "num":
+			try:
+				value = float(value)
+				return True
+			except:
+				return False
+			
+	else:
+		return True
 
 
 app = Flask(__name__)
@@ -10,7 +33,18 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-	return 'Hello World'
+
+	kvs = init_kvs() 
+
+	audioLoopEnabled = kvs["audio_loop_enabled"].decode()
+
+	if audioLoopEnabled == "True":
+		audioChecked_var = "checked"
+	else:
+		audioChecked_var = ""
+
+	return render_template('index.html', audioChecked=audioChecked_var)
+
 
 
 @app.route("/config/<parameter>", methods = ['POST','GET'])
@@ -30,11 +64,18 @@ def manageConfig(parameter):
 		if len(data) == 0:
 			return "body recieved is empty",400
 		else:
-			try:
-				kvs[parameter] = data
-				return "ack", 200
-			except Exception as e:
-				return e, 500
+			
+			valid = validateKvsValue(parameter,data)
+			
+			if valid:
+
+				try:
+					kvs[parameter] = data
+					return "ack", 200
+				except Exception as e:
+					return e, 500
+			else:
+				return "unable to validate k:v pair", 418
 		
 		
 	elif request.method == 'GET':
