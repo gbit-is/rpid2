@@ -1,0 +1,6 @@
+__pycache__
+.vault
+*.swp
+kvs.db
+*.py_*
+index.html_*

@@ -1,134 +1,134 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
+	<html>
+	<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+	.switch {
+	  position: relative;
+	  display: inline-block;
+	  width: 60px;
+	  height: 34px;
+	}
 
-.switch input { 
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+	.switch input { 
+	  opacity: 0;
+	  width: 0;
+	  height: 0;
+	}
 
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
+	.slider {
+	  position: absolute;
+	  cursor: pointer;
+	  top: 0;
+	  left: 0;
+	  right: 0;
+	  bottom: 0;
+	  background-color: #ccc;
+	  -webkit-transition: .4s;
+	  transition: .4s;
+	}
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
+	.slider:before {
+	  position: absolute;
+	  content: "";
+	  height: 26px;
+	  width: 26px;
+	  left: 4px;
+	  bottom: 4px;
+	  background-color: white;
+	  -webkit-transition: .4s;
+	  transition: .4s;
+	}
 
-input:checked + .slider {
-  background-color: #2196F3;
-}
+	input:checked + .slider {
+	  background-color: #2196F3;
+	}
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
+	input:focus + .slider {
+	  box-shadow: 0 0 1px #2196F3;
+	}
 
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
+	input:checked + .slider:before {
+	  -webkit-transform: translateX(26px);
+	  -ms-transform: translateX(26px);
+	  transform: translateX(26px);
+	}
 
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
+	/* Rounded sliders */
+	.slider.round {
+	  border-radius: 34px;
+	}
 
-.slider.round:before {
-  border-radius: 50%;
-}
-</style>
-</head>
-<body>
+	.slider.round:before {
+	  border-radius: 50%;
+	}
+	</style>
+	</head>
+	<body>
 
-<h2>Random audio enabled</h2>
-
-
-<label class="switch">
-  <input type="checkbox" {{ audioChecked }} id="randomAudioToggle" onclick="myFunction()">
-  <span class="slider round"></span>
-</label>
+	<h2>Random audio enabled</h2>
 
 
+	<label class="switch">
+	  <input type="checkbox" {{ audioChecked }} id="randomAudioToggle" onclick="myFunction()">
+	  <span class="slider round"></span>
+	</label>
 
+
+
+	<script>
+	function myFunction() {
+	  var checkBox = document.getElementById("randomAudioToggle");
+	  if (checkBox.checked == true){
+		var foo = "True";
+		
+
+	  } else {
+		var foo = "False";
+	  }
+
+
+	  let xhr = new XMLHttpRequest();
+	  xhr.open("POST","/config/audio_loop_enabled");
+	  xhr.setRequestHeader("Accept", "application/json");
+	  xhr.setRequestHeader("Content-Type", "application/json");
+	  xhr.onload = () => console.log(xhr.responseText);
+	  xhr.send(foo);  
+
+
+
+
+
+	}
+	</script>
+
+
+
+<br>
+<br>
+<br>
+
+<h2>Random audio intervals</h2>
+
+
+<input id=demoInput value=105 type=number min=100 max=110>
+<button onclick="increment()">+</button>
+<button onclick="decrement()">-</button>
 <script>
-function myFunction() {
-  var checkBox = document.getElementById("randomAudioToggle");
-  if (checkBox.checked == true){
-	var foo = "True";
+    function increment() {
+        document.getElementById('demoInput').stepUp();
+	console.log(document.getElementById('demoInput').value)
 	
-
-  } else {
-	var foo = "False";
-  }
-
-
-  let xhr = new XMLHttpRequest();
-  xhr.open("POST","http://192.168.1.2:5000/config/audio_loop_enabled");
-  xhr.setRequestHeader("Accept", "application/json");
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.onload = () => console.log(xhr.responseText);
-  xhr.send(foo);  
-
-
-
-
-
-}
+    }
+    function decrement() {
+        document.getElementById('demoInput').stepDown();
+    }
 </script>
 
 
 
 
 
-
-<script>
-function foobar() {
-  console.log("asdadadas");
-  var checkBox = document.getElementById("randomAudioToggle");
-  if (checkBox.checked == true){
-    #console.log("A");
-    someStuff = 'True';
-  } else {
-    console.log("B");
-    someStuff = 'False';
-  }
-
-
-  //xhr.open("POST", /config/audio_loop_enabled, true);
-  //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-  //xhr.send(someStuff);
-}
-</script>
-
-
-
-
-</body>
-</html> 
+	</body>
+	</html> 
 
