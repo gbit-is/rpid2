@@ -76,19 +76,53 @@ input:checked + .slider:before {
 
 
 
+<script>
+function myFunction() {
+  var checkBox = document.getElementById("randomAudioToggle");
+  if (checkBox.checked == true){
+	var foo = "True";
+	
+
+  } else {
+	var foo = "False";
+  }
+
+
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST","http://192.168.1.2:5000/config/audio_loop_enabled");
+  xhr.setRequestHeader("Accept", "application/json");
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.onload = () => console.log(xhr.responseText);
+  xhr.send(foo);  
+
+
+
+
+
+}
+</script>
+
+
 
 
 
 
 <script>
-function myFunction() {
+function foobar() {
   console.log("asdadadas");
   var checkBox = document.getElementById("randomAudioToggle");
   if (checkBox.checked == true){
-    console.log("A");
+    #console.log("A");
+    someStuff = 'True';
   } else {
     console.log("B");
+    someStuff = 'False';
   }
+
+
+  //xhr.open("POST", /config/audio_loop_enabled, true);
+  //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+  //xhr.send(someStuff);
 }
 </script>
 
