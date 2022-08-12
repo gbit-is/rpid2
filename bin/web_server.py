@@ -38,13 +38,15 @@ def hello_world():
 	kvs = init_kvs() 
 
 	audioLoopEnabled = kvs["audio_loop_enabled"].decode()
+	audio_loop_interval_low = kvs["audio_loop_interval_low"].decode()
+	audio_loop_interval_high = kvs["audio_loop_interval_high"].decode()
 
 	if audioLoopEnabled == "True":
 		audioChecked_var = "checked"
 	else:
 		audioChecked_var = ""
 
-	return render_template('index.html', audioChecked=audioChecked_var)
+	return render_template('index.html', audioChecked=audioChecked_var,audioLowInterval_value=audio_loop_interval_low,audioHighInterval_value=audio_loop_interval_high)
 
 
 

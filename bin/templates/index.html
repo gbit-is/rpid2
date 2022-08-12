@@ -111,17 +111,62 @@
 <h2>Random audio intervals</h2>
 
 
-<input id=demoInput value=105 type=number min=100 max=110>
-<button onclick="increment()">+</button>
-<button onclick="decrement()">-</button>
+<h4> low interval </h4>
+<input id=audioLowInterval value={{ audioLowInterval_value }} type=number min=0 >
+<button onclick="increment('audioLowInterval','/config/audio_loop_interval_low')">+</button>
+<button onclick="decrement('audioLowInterval','/config/audio_loop_interval_low')">-</button>
+
+
+<h4> High interval </h4>
+<input id=audioHighInterval value= {{ audioHighInterval_value }} type=number min=0 >
+<button onclick="increment('audioHighInterval','/config/audio_loop_interval_high')">+</button>
+<button onclick="decrement('audioHighInterval','/config/audio_loop_interval_high')">-</button>
+
+
+
+
+
+
 <script>
-    function increment() {
-        document.getElementById('demoInput').stepUp();
-	console.log(document.getElementById('demoInput').value)
+
+    function update_audio_low_val(value) {
+	console.log(value)
+
+         let xhr = new XMLHttpRequest();
+          xhr.open("POST","/config/audio_loop_interval_low");
+          xhr.setRequestHeader("Accept", "application/json");
+          xhr.setRequestHeader("Content-Type", "application/json");
+          xhr.onload = () => console.log(xhr.responseText);
+          xhr.send(value);
+
+
+
+    }
+
+    function update_kvs_value(value,path) {
+	console.log(value,path)
+
+	let xhr = new XMLHttpRequest();
+          xhr.open("POST",path);
+          xhr.setRequestHeader("Accept", "application/json");
+          xhr.setRequestHeader("Content-Type", "application/json");
+          xhr.onload = () => console.log(xhr.responseText);
+          xhr.send(value);
+
+
+
+
+    }
+
+
+    function increment(inputId,path) {
+        document.getElementById(inputId).stepUp();
+	update_kvs_value(document.getElementById(inputId).value,path)
 	
     }
-    function decrement() {
-        document.getElementById('demoInput').stepDown();
+    function decrement(inputId,path) {
+        document.getElementById(inputId).stepDown();
+	update_kvs_value(document.getElementById(inputId).value,path)
     }
 </script>
 

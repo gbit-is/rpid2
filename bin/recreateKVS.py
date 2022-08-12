@@ -13,6 +13,8 @@ def createKVS():
 	kvs["audio_loop_interval_low"] = config["audio"]["loop_interval_low"]
 	kvs["audio_loop_interval_high"] = config["audio"]["loop_interval_high"]
 
+	kvs["audio_song_enabled"] = config["audio"]["song_enabled"] 
+
 
 
 
