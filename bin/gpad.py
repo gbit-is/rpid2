@@ -15,7 +15,14 @@ import json
 
 joystickSpeed = config["gamepad"]["joystickSpeed"]
 joystickSteering = config["gamepad"]["joystickSteering"]
+
+domeLeft = config["gamepad"]["domeLeft"]
+domeRight = config["gamepad"]["domeRight"]
+
 pollInterval = float(config["gamepad"]["pollInterval"])
+
+
+
 
 deadZone = float(config["gamepad"]["deadZone"])
 turnMultiplier = float(config["gamepad"]["turnMultiplier"])
@@ -63,12 +70,32 @@ def pollGamepad(gamepad):
 
 	speed = ( gamepad.axis(joystickSpeed) * 100 ) * -1
 	steering = gamepad.axis(joystickSteering) * 100
+	dome_speed_l = gamepad.axis(domeLeft)
+	dome_speed_r = gamepad.axis(domeRight)
+
+	
 
 	if abs(speed) < deadZone:
 		speed = 0
 	if abs(steering) < deadZone:
 		steering = 0
-	return speed, steering
+	if ( dome_speed_l + dome_speed_r ) < -1.99:
+		dome_speed = 0
+	else:
+		if dome_speed_l > -1 and dome_speed_r > -1:
+			print("can't turn dome two ways at the same time")
+			dome_speed = 0
+		else:
+			if dome_speed_l > -1:
+				dome_axis = dome_speed_l
+				dome_dir = 1
+			else:
+				dome_axis = dome_speed_r
+				dome_dir = -1
+
+			dome_speed = ((( (dome_axis + 1) / 2 ) * dome_dir ) * 100 )
+
+	return speed, steering,dome_speed
 	
 
 
@@ -89,9 +116,12 @@ def manage_gamepad():
 		while gamepad.isConnected():
 			axis = pollGamepad(gamepad)
 			message = {
-				"X_axis" : axis[1],
-				"Y_axis" : axis[0]
+				"Y_axis" : axis[0],
+				"X_axis" : axis[1]
 			}
+			if axis[2] != 0:
+				message["D_axis"] = axis[2]
+
 			try:
 				sendToSocket(motorClient,message)
 			except:

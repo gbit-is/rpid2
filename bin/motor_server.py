@@ -11,7 +11,7 @@ import json
 from motors import *
 
 motorPins = set_motor_gpios()
-left_motor_pwm,left_motor_dir,right_motor_pwm,right_motor_dir = motorPins
+#left_motor_pwm,left_motor_dir,right_motor_pwm,right_motor_dir,dome_motor_pwm,dome_motor_dir = motorPins
 
 
 socketPath = config["sockets"]["main_motors"]
@@ -45,8 +45,8 @@ while True:
 
 		try:
 			data = json.loads(data)
-			print(data)
-			runMotor(data["X_axis"],data["Y_axis"],motorPins)
+			#print(data)
+			runMotor(data,motorPins)
 
 		
 		except Exception as e:
@@ -68,7 +68,7 @@ while True:
 		if noContact_count > noContact_max:
 			print("no contact recieved for "  + str(noContact_max) + " pulls")
 			print("sending stop to motor")
-			runMotor(0,0,motorPins)
+			#runMotor(0,0,motorPins)
 			noContact_count = 0
 
 	#print(noContact_count)

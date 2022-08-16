@@ -104,7 +104,7 @@ def playSong(fileName):
 
 
 
-playSong("/home/pi/gitt/rpid2/sounds/padawan/songs/cantina.wav")
+#playSong("/home/pi/gitt/rpid2/sounds/padawan/songs/cantina.wav")
 
 
 
