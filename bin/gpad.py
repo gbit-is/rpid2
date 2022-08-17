@@ -13,6 +13,9 @@ import json
 
 
 
+kvs = init_kvs()
+
+
 joystickSpeed = config["gamepad"]["joystickSpeed"]
 joystickSteering = config["gamepad"]["joystickSteering"]
 
@@ -119,8 +122,10 @@ def manage_gamepad():
 				"Y_axis" : axis[0],
 				"X_axis" : axis[1]
 			}
-			if axis[2] != 0:
+			kvs = init_kvs()
+			if kvs["dome_manual_control"].decode() == "True":
 				message["D_axis"] = axis[2]
+			print(message)
 
 			try:
 				sendToSocket(motorClient,message)

@@ -158,12 +158,26 @@ def runMotor(axis_info,motorPins):
 			right_motor_pwm.ChangeDutyCycle(rightTire_pwm_value)
 
 	if "D_axis" in axis_info:
-		print("rotate dome")
+		D_axis = axis_info["D_axis"]
+                #X_axis_abs = ( abs(X_axis) * power_multiplier ) * steering_multiplier
+		D_axis_abs = abs(D_axis)
+		if D_axis > 0:
+			print("dome right")
+			dome_direction = 1
+		else:
+			print("dome left")
+			dome_direction = 0
+
+		GPIO.output(dome_motor_dir,dome_direction)
+		dome_motor_pwm.ChangeDutyCycle(D_axis_abs)
+
+
+		
 
 
 if __name__ == "__main__":
-	axis_info = {'Y_axis': 0, 'X_axis': 0, 'D_axis': 0}
-	axis_info = {'Y_axis': 20, 'X_axis': 0}
+	axis_info = {'Y_axis': 0, 'X_axis': 0, 'D_axis': 30}
+	#axis_info = {'Y_axis': 20, 'X_axis': 0}
 
 	motorPins = set_motor_gpios()
 	try:

@@ -14,6 +14,7 @@ def createKVS():
 	kvs["audio_loop_interval_high"] = config["audio"]["loop_interval_high"]
 
 	kvs["audio_song_enabled"] = config["audio"]["song_enabled"] 
+	kvs["dome_manual_control"] = "True"
 
 
 
