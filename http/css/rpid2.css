@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  height: 100vh;
+  background: #DCDCDD;
+  background: linear-gradient(180deg, rgba(220, 220, 221, 1) 0%, rgba(200, 200, 228, 1) 100%);
+}
+
+.btn {
+ background-color: #0089ff;
+}
+
+
+//a {
+//	color: black;
+//}
+
+//li.active>a {
+//	background-color: red !important ;
+//}
