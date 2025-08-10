@@ -1,0 +1,13 @@
+[Unit]
+Description=init zeodb contents
+After=zeodb.service
+
+ 
+[Service]
+User=pi
+WorkingDirectory=/opt/rpid2/bin
+ExecStart=sh -c ". ../venv/bin/activate; ./bootstrap.py"
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=init_zeodb.service

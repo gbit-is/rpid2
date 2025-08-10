@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from common import *
 from json_db import *
 

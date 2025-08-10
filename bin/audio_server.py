@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import random
 import time
@@ -52,8 +53,9 @@ class volume_control_class():
 volume_control = volume_control_class()
 
 if not NOSOUND:
-	import pygame
-	pygame.mixer.init()
+    if __name__ == "__main__":
+        import pygame
+        pygame.mixer.init()
 
 
 
@@ -66,6 +68,7 @@ def playSound(fileName):
 
 def generate_sound(low=3,high=10):
 	randomCount = random.randint(low, high)
+	print(low,high,randomCount)
 	files = random.sample(alphabet_files,randomCount)
 	word = ""
 	for file in files:
@@ -101,28 +104,30 @@ def sound_loop_thread():
 
 def sound_looper_proc():
 
-	while True:
-		jdb.connection.sync()
-		if jdb.get("audio","loop","enabled","value")[1]:
-			generate_sound()
+    while True:
+        jdb.connection.sync()
+        if jdb.get("audio","loop","enabled","value")[1]:
+            audio_loop_length_low = jdb.get("audio","loop","length","low","value")[1] 
+            audio_loop_length_high = jdb.get("audio","loop","length","high","value")[1] 
+
+            generate_sound(audio_loop_length_low,audio_loop_length_high)
 		
-			audio_loop_interval_low = jdb.get("audio","loop","interval","low","value")[1]
-			audio_loop_interval_high = jdb.get("audio","loop","interval","high","value")[1]
-			print(audio_loop_interval_low,audio_loop_interval_high)
+            audio_loop_interval_low = jdb.get("audio","loop","interval","low","value")[1]
+            audio_loop_interval_high = jdb.get("audio","loop","interval","high","value")[1]
 		
 
-			try:
-				sleep_time = random.randint(audio_loop_interval_low,audio_loop_interval_high)
-			except:
-				logger.error("Failed to generate random time")
-				sleep_time = 30
+            try:
+                sleep_time = random.randint(audio_loop_interval_low,audio_loop_interval_high)
+            except:
+                logger.error("Failed to generate random time")
+                sleep_time = 30
 			
 
-			logger.debug("Sleeping for: " + str(sleep_time) + " seconds")
-			time.sleep(sleep_time)
-		else:
-			logger.debug("audio loop thread disabled")
-			time.sleep(10)
+            logger.debug("Sleeping for: " + str(sleep_time) + " seconds")
+            time.sleep(sleep_time)
+        else:
+            logger.debug("audio loop thread disabled")
+            time.sleep(10)
 
 
 def list_audio_files():

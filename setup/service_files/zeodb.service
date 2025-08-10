@@ -1,0 +1,12 @@
+[Unit]
+Description=zeodb service
+After=syslog.target
+ 
+[Service]
+User=pi
+WorkingDirectory=/opt/rpid2/etc
+ExecStart=sh -c ". ../venv/bin/activate; runzeo -C zeo.conf"
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=zeodb.service

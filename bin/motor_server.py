@@ -1,4 +1,9 @@
-from random import randrange
+import sys
+import time
+import serial
+
+from common import *
+logger = get_logger("motor_server")
 
 
 default_joystick_deadzone=20
@@ -23,21 +28,22 @@ def calculate_motors(direction,turn,deadzone=default_joystick_deadzone):
 
     return left_motor, right_motor
 
-def test_formula():
+def initUART(config_section):
+	serial_port = config.get(config_section,"serial_port")
+	serial_baud = config.getint(config_section,"serial_baud")
 
-    print("Dir".ljust(10),"Turn".ljust(10),"M1".ljust(10),"m2".ljust(10))
+	logger.info("Connecting to mototor controller (UART)")
 
-    for i in range(15):
 
-        a = randrange(-256,256)
-        b = randrange(-256,256)
+	uart_ready = False
+	while not uart_ready:
+		try:
+			UART = serial.Serial (serial_port, serial_baud)    #Open port with baud rate
+			uart_ready = True
+			return UART
 
-        c,d = calculate_motors(a,b)
-        
-        for i in a,b,c,d:
-            print(str(i).ljust(10),end="")
+		except Exception as e:
+			logger.error("Unable to connect UART\Error is:")
+			logge.error(str(e))
+			time.sleep(1)
 
-        print()
-        
-        
-test_formula()

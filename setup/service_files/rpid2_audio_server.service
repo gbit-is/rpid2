@@ -1,0 +1,13 @@
+[Unit]
+Description=Manage RPID2 audio
+After=zeodb.service
+
+ 
+[Service]
+User=pi
+WorkingDirectory=/opt/rpid2/bin
+ExecStart=sh -c ". ../venv/bin/activate; ./audio_server.py"
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=audio_server.service

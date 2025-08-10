@@ -1,0 +1,11 @@
+[Unit]
+Description=nanomq service
+After=syslog.target
+ 
+[Service]
+User=pi
+ExecStart=/usr/local/bin/nanomq start
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=nanomq.service

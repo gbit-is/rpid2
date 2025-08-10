@@ -1,0 +1,13 @@
+[Unit]
+Description=Manage RPID2 api
+After=zeodb.service
+
+ 
+[Service]
+User=pi
+WorkingDirectory=/opt/rpid2/bin
+ExecStart=sh -c ". ../venv/bin/activate; uvicorn web_server:app --port 9000 --host 0.0.0.0"
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=api_server.service
