@@ -82,7 +82,7 @@ def get_dir_map():
 
 
 import configparser
-config = configparser.ConfigParser()
+config = configparser.ConfigParser(inline_comment_prefixes="#")
 config.read('../etc/rpid2.conf')
 
 if __name__ == "__main__":

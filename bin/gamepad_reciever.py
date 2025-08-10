@@ -1,52 +1,73 @@
-
 import time
-import inputs
+import socket
 
 
-def parse_event(event):
+from common import *
 
-    if event.code == "SYN_REPORT":
-        return
+import Gamepad
 
-    key = event.code
-    val = event.state
-    print(key,val)
+HOST = "127.0.0.1"
+PORT = config.getint("ports","motor_server")
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
 
-
-def main():
-
-    while True:
-
-
-        print(inputs.devices.gamepads)
-
-        try:
-            events = inputs.get_gamepad()
-            for event in events:
-                parse_event(event)
-        except OSError as e:
-            print("oserror, trying to reinitialise controller")
-            time.sleep(0.5)
-
-            
-            for i in dir(inputs):
-                print(i)
-            exit()
+axis = { }
+axis["direction"] = config.getint("gamepad","direction")
+axis["turn"] = config.getint("gamepad","turn")
+axis["invert_direction"] =  config.getint("gamepad","invert_dir")
+axis["invert_turn"] =  config.getint("gamepad","invert_turn")
+axis["deadzone"] = config.getint("gamepad","deadzone")
 
 
+def init_gamepad():
 
-        except Exception as e:
-            print(e)
-            print(e.__class__.__name__)
+	gamepad_type_name = config.get("gamepad","gamepad_type")
 
-            for i in dir(e):
-                print(i)
-
-            exit()
+	gamepad_type = getattr(Gamepad, gamepad_type_name)
 
 
+	if not Gamepad.available():
+		print('Please connect your gamepad...')
+		while not Gamepad.available():
+			print("waiting for gamepad")
+			time.sleep(1.0)
+
+	gamepad = gamepad_type()
+	print('Gamepad connected')
+	gamepad.startBackgroundUpdates()
+	return gamepad
 
 
-if __name__ == "__main__":
-    main()
-    pass
+def drive(*args):
+
+	gamepad_data = gamepad.axisMap
+	direction = round( ( gamepad_data[axis["direction"]] * 100 ) * axis["invert_direction"],2 )
+	turn = round( ( gamepad_data[axis["turn"]] * 100 )  * axis["invert_turn"],2 )
+
+
+	if abs(direction) < axis["deadzone"]:
+		direction = 0
+	if abs(turn) < axis["deadzone"]:
+		turn = 0
+		
+	msg = "drive," + str(direction) + "," + str(turn)
+	print(msg)
+	s.sendall(msg.encode())
+
+	
+	
+
+
+	
+	
+
+
+def manage_gamepad(gamepad):
+	
+	
+	gamepad.addAxisMovedHandler(axis["direction"],drive)
+	gamepad.addAxisMovedHandler(axis["turn"],drive)
+
+
+gamepad = init_gamepad()
+manage_gamepad(gamepad)
