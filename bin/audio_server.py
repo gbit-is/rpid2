@@ -6,7 +6,7 @@ import threading
 import common
 from json_db import *
 from mqttclient import *
-import pyvolume
+#import pyvolume
 
 #pyvolume.custom(percent=30)
 
@@ -38,15 +38,19 @@ class volume_control_class():
 
 
 	def __init__(self):
+		self.volume = { }
 		self._get_vals()
+
 
 	def _get_vals(self):
 		jdb.connection.sync()
 		self.enabled = jdb.get("audio","enabled","value")[1]
-		self.volume_level = jdb.get("audio","volume","value")[1]
+		self.volume["main"] = jdb.get("audio","volume","main","value")[1] / 100
+		self.volume["loop"] = ( jdb.get("audio","volume","generated","value")[1] / 100 ) * self.volume["main"]
+		self.volume["manual"] = (  jdb.get("audio","volume","manual","value")[1] / 100 ) * self.volume["main"]
 	def update(self):
 		self.__init__()
-		pyvolume.custom(self.volume_level)
+
 		
 
 
@@ -62,6 +66,8 @@ if not NOSOUND:
 def playSound(fileName):
 
 	sound = pygame.mixer.Sound(fileName)
+	volume = volume_control.volume["loop"]
+	sound.set_volume(volume)
 	playing = sound.play()
 	while playing.get_busy():
 		pygame.time.delay(10)
@@ -76,6 +82,7 @@ def generate_sound(low=3,high=10):
 		word += letter
 	logger.debug("Word is: " + word)
 	volume_control.update()
+
 	if volume_control.enabled:
 		logger.debug("Playing sound (generate_sound)")
 		for file in files:
@@ -191,8 +198,17 @@ def play_audio_file(file_name,stop_event):
 	if volume_control.enabled:
 		logger.debug("Playing sound (play_audio_file)")
 		sound = pygame.mixer.Sound(file_path)
+		volume = volume_control.volume["manual"]
+		sound.set_volume(volume)
 		playing = sound.play()
+		c = 0
 		while playing.get_busy():
+			c += 1
+			if c == 100:
+				volume_control.update()
+				volume = volume_control.volume["manual"]
+				sound.set_volume(volume)
+				c = 0
 			pygame.time.delay(10)
 			if stop_event.is_set():
 				sound.stop()
