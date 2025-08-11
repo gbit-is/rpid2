@@ -169,6 +169,15 @@ function change_numeric(event) {
 	update_value(numeric_id,numeric_value)
 }
 
+function change_slider(event) {
+        numeric_id = event.target.id
+        numeric_value = event.target.value
+        update_value(numeric_id,numeric_value)
+	num_box = document.getElementById(numeric_id + "_num")	
+	num_box.textContent = numeric_value
+
+}
+
 function generate_toggle(toggle_key,toggle_value) {
 
 	const toggle_parent_div = document.getElementById("params_toggle");
@@ -227,10 +236,18 @@ function generate_slider(slider_key,slider_value) {
         const slider_name_div =  document.createElement("div");
 	const slider_name_span = document.createElement("span");
 
+	const slider_number_div =  document.createElement("div");
+	const slider_number_span = document.createElement("span");
+
 
 	slider_name_div.style.display = "table-cell";
         slider_name_div.style.width = "10%";
 	slider_name_span.textContent = slider_key;
+
+        slider_number_div.style.display = "table-cell";
+        slider_number_div.style.width = "10%";
+        slider_number_span.textContent = slider_value["value"]
+	slider_number_span.id = slider_key + "_num";
 
 	var slider_div = document.createElement("div");
 	slider_div.style.display = "table-cell";
@@ -249,7 +266,8 @@ function generate_slider(slider_key,slider_value) {
         slider.classList.add("slider_class");
         slider.step = 1;
 
-	slider.addEventListener('change',change_numeric)
+	//slider.addEventListener('change',change_numeric)
+	slider.addEventListener('change',change_slider)
 
 	slider_name_div.display = "table-row";
 
@@ -258,6 +276,10 @@ function generate_slider(slider_key,slider_value) {
 
 	slider_row.appendChild(slider_name_div)
 	slider_row.appendChild(slider_div)
+	
+	slider_number_div.appendChild(slider_number_span)
+	slider_row.appendChild(slider_number_div)
+
 	slider_parent_div.appendChild(slider_row)
 
 }
