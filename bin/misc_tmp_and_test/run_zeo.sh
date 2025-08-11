@@ -2,4 +2,4 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 cd ..
 
-runzeo -C zeo.conf
+runzeo -C ../etc/zeo.conf
