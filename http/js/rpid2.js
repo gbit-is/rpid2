@@ -26,12 +26,22 @@ async function get_params() {
 }
 
 
-async function generate_controls() {
-    const data = await get_params();
+async function generate_controls(debug) {
+
+    let data;
+
+    if (debug) {
+    	let raw_data = '{"audio.enabled":{"value":true,"type":"bool","http_type":"toggle","http_extra":null},"audio.volume.main":{"value":80,"type":"int","http_type":"slider","http_extra":"0-100"},"audio.volume.generated":{"value":53,"type":"int","http_type":"slider","http_extra":"0-100"},"audio.volume.manual":{"value":60,"type":"int","http_type":"slider","http_extra":"0-100"},"audio.loop.interval.low":{"value":11,"type":"int","http_type":"numsel","http_extra":"1-9999"},"audio.loop.interval.high":{"value":30,"type":"int","http_type":"numsel","http_extra":"1-9999"},"audio.loop.length.low":{"value":3,"type":"int","http_type":"numsel","http_extra":"1-9999"},"audio.loop.length.high":{"value":10,"type":"int","http_type":"numsel","http_extra":"10-999"},"audio.loop.enabled":{"value":true,"type":"bool","http_type":"toggle","http_extra":null}}'
+	data = JSON.parse(raw_data)
+
+    }
+    else {
+    	data = await get_params();
+    }
+
 
 
     for (const [key, value] of Object.entries(data)) {
-      //console.log(key, value);
 	if ( value["http_type"] == "toggle" ) {
 		generate_toggle(key,value);
 	}
@@ -49,8 +59,18 @@ async function generate_controls() {
 
 
 
-async function generate_soundboard() {
-	const data = await list_sounds();
+async function generate_soundboard(debug) {
+
+	let data;
+
+	if (debug) {
+		raw_data = '{"base":["GENERATE","RANDOM","STOP"],"songs":["CANTINA","DUEL_FATES","EMPEROR","THEME"],"speak":["LEIA_MSG"],"sounds":["ALARM_1","ALARM_2","ALARM_3","ALARM_4","ANNOYED","BLEEP_1","BLEEP_2","BLEEP_3","CHORTLE","LONG_BLEEP_1","LONG_DOO","MISC_1","MISC_2","MISC_3","MISC_4","MISC_5","MISC_6","MISC_7","MISC_8","OOH_1","OOH_2","OOH_3","OOH_4","OOH_5","OOH_6","PATROL","SCREAM","SENT_1","SENT_10","SENT_11","SENT_12","SENT_13","SENT_14","SENT_15","SENT_16","SENT_17","SENT_18","SENT_19","SENT_2","SENT_3","SENT_4","SENT_5","SENT_6","SENT_7","SENT_8","SENT_9","SHORT-CIRCUIT","WHISTLE"]}'
+		data = data = JSON.parse(raw_data)
+	}
+	else {
+		const data = await list_sounds();
+		console.log(data)
+	}
 
 	const buttonContainer = document.getElementById("button-container");
 
@@ -59,17 +79,22 @@ async function generate_soundboard() {
 		const category = document.createElement("div");
 		category.className = "row g-2"
 		const title = document.createElement("span")
+	
 		title.textContent = key
+		title.classList.add("title_text")
 		category.appendChild(title)
 
 		var br = document.createElement("br");
 		category.appendChild(br)
 
+		let col_count = 1;
+		let col_max = 4;
+
 		for ( const [ num, name ] of  Object.entries(value) ) {
 
 			const col = document.createElement("div");
 			//col.className = "col-6 col-sm-4 col-md-3"; 
-			col.className = "col-sm-2"; 
+			col.className = "col-sm-3"; 
 			const btn = document.createElement("button");
 			btn.className = "btn btn-primary w-100";
 			btn.textContent = name;
@@ -89,7 +114,6 @@ async function generate_soundboard() {
 function play_sound(event) {
 	let sound_id = event.target.id
 	let message = "play:" + sound_id
-	console.log(message)
 	send_mqtt("my/audio/server",message)
 
 }
@@ -99,7 +123,6 @@ function send_mqtt(topic_raw,message) {
 
         let topic = topic_raw.trim().replace(/\//g, "_");
         let url = `http://${window.location.hostname}:${apiPort}/mqtt/post/${topic}`;
-	console.log(url)
 	
 	value = message
 
@@ -180,18 +203,21 @@ function change_slider(event) {
 
 function generate_toggle(toggle_key,toggle_value) {
 
+
 	const toggle_parent_div = document.getElementById("params_toggle");
 
 	const toggle_div = document.createElement("div");
 	
 	const toggle_name_div =  document.createElement("div");
 	toggle_name_div.style.display = "table-cell";
+	
 	//toggle_name_div.style.width = "10%";
 
 
 
 	let toggle_name_span = document.createElement("span")
 	toggle_name_span.textContent = toggle_key
+	toggle_name_span.classList.add("title_text")
 
 	const toggle_switch_div =  document.createElement("div");
         toggle_switch_div.style.display = "table-cell";
@@ -224,6 +250,7 @@ function generate_toggle(toggle_key,toggle_value) {
 	toggle_div.appendChild(toggle_switch_div)
 	toggle_parent_div.appendChild(toggle_div)
 	
+	
 
 }
 
@@ -243,11 +270,13 @@ function generate_slider(slider_key,slider_value) {
 	slider_name_div.style.display = "table-cell";
         slider_name_div.style.width = "10%";
 	slider_name_span.textContent = slider_key;
+	slider_name_span.classList.add("title_text")
 
         slider_number_div.style.display = "table-cell";
         slider_number_div.style.width = "10%";
         slider_number_span.textContent = slider_value["value"]
 	slider_number_span.id = slider_key + "_num";
+	slider_number_span.classList.add("title_text")
 
 	var slider_div = document.createElement("div");
 	slider_div.style.display = "table-cell";
@@ -263,7 +292,7 @@ function generate_slider(slider_key,slider_value) {
         slider.min = min_val;
         slider.max = max_val;
         slider.value = slider_value["value"];
-        slider.classList.add("slider_class");
+        slider.classList.add("sslider");
         slider.step = 1;
 
 	//slider.addEventListener('change',change_numeric)
@@ -298,6 +327,7 @@ function generate_number_input(input_key, input_value) {
 
     const nameSpan = document.createElement("span");
     nameSpan.textContent = input_key;
+    nameSpan.classList.add("title_text")
     nameCell.appendChild(nameSpan);
 
     // Control cell
@@ -311,6 +341,7 @@ function generate_number_input(input_key, input_value) {
     // Create - button
     const minusBtn = document.createElement("button");
     minusBtn.textContent = "−";
+    minusBtn.classList.add("num_but")
 
     // Create input field
     const inputField = document.createElement("input");
@@ -325,6 +356,7 @@ function generate_number_input(input_key, input_value) {
     // Create + button
     const plusBtn = document.createElement("button");
     plusBtn.textContent = "+";
+    plusBtn.classList.add("num_but")
 
     // Event listeners
     minusBtn.addEventListener("click", () => {
@@ -353,5 +385,18 @@ function generate_number_input(input_key, input_value) {
     parent.appendChild(row);
 }
 
-generate_controls()
-generate_soundboard()
+const params = new URLSearchParams(window.location.search);
+const debug = params.has("debug");
+
+if (debug) {
+	document.addEventListener("DOMContentLoaded", async () => {
+
+	generate_controls(debug)
+	generate_soundboard(debug)
+
+	});
+}
+else {
+	generate_controls(debug)
+	generate_soundboard(debug)
+}
