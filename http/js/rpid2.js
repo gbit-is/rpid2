@@ -68,16 +68,20 @@ async function generate_soundboard(debug) {
 		data = data = JSON.parse(raw_data)
 	}
 	else {
-		const data = await list_sounds();
-		console.log(data)
+		data = await list_sounds();
 	}
+
+	console.log(data)	
 
 	const buttonContainer = document.getElementById("button-container");
 
 	for (const [key, value] of Object.entries(data)) {
+
 		
 		const category = document.createElement("div");
-		category.className = "row g-2"
+
+		let row_div = document.createElement("div")
+		row_div.className = "row g-2"
 		const title = document.createElement("span")
 	
 		title.textContent = key
@@ -102,8 +106,18 @@ async function generate_soundboard(debug) {
 			btn.addEventListener("click", play_sound)
 			col.appendChild(btn);
 			//buttonContainer.appendChild(col);
-			category.appendChild(col);
+			//category.appendChild(col);
+			row_div.appendChild(col);
+			col_count++;
+			console.log(col_count)
+			if ( col_count == col_max ){
+				category.appendChild(row_div)
+				row_div = document.createElement("div")
+				row_div.className = "row g-2"
+				col_count = 0
+			}
 		}
+		category.appendChild(row_div)
 		buttonContainer.appendChild(category)
 		var br = document.createElement("br");
 		buttonContainer.appendChild(br)
