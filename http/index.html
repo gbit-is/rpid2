@@ -7,51 +7,63 @@
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/toggle.css">
   <link rel="stylesheet" href="/css/rpid2.css">
+  <link rel="stylesheet" type="text/css" href="/css/augmented-ui.min.css">
+
   <script src="/js/jquery.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
   <script src="/js/rpid2.js"></script>
 </head>
 <body>
 
-<div class="container">
+<div class="container" style="width:95%;height=95vh">
+
+   <!-- <div class="my-augfiguration" data-augmented-ui="tl-clip tr-clip t-clip-xy" > --> <!-- style="height:4vh"> -->
+   <div id="banner" class="my-augfiguration" data-augmented-ui="tl-clip tr-clip border inlay" > <!-- style="height:4vh"> -->
 
   <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
     <li><a data-toggle="tab" href="#params">Parameters</a></li>
     <li><a data-toggle="tab" href="#soundboard">Soundboard</a></li>
-    <li><a data-toggle="tab" href="#menu3">Menu 3</a></li>
+
   </ul>
 
-  <div class="tab-content">
-    <div id="home" class="tab-pane fade in active">
-      <h3>HOME</h3>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-
- <div class="container my-4">
-    <div id="button-container" class="row g-2">
-	</div>
 	</div>
 
+  <div class="tab-content" style="95%">
+    <div id="home" class="tab-pane fade in active" >
+	<div class="my-augfiguration main" data-augmented-ui="br-2-clip-x bl-clip-x border inlay" style="height:95vh"> 
+		<div class="content_tab">
 
-    </div>
+			<div class="container-fluid-logo" > <img src="/img/text_logo.svg" alt="Italian Trulli" class="home_img"> </div>
+			<img src="/img/r2d2_vector.svg" alt="Italian Trulli" class="home_img">
+		</div>
+    	</div>
+   </div>
+	
 
     <div id="params" class="tab-pane fade">
-      <h3>Parameters</h3>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-        <div id="params_toggle"> </div>
-        <div id="params_slider"> </div>
+        <!-- full tab example -->
+	<div class="my-augfiguration main not-front" data-augmented-ui="br-2-clip-x bl-clip-x border inlay" style="height:95vh"> 
+        <!-- <div class="my-augfiguration" data-augmented-ui="tr-clip bl-clip br-clip-y both" style="height:95vh"> -->
+	<div class="content_tab">
+	<div class="container-fluid-bg" > <img src="/img/r2d2_bg.svg" alt="Italian Trulli" class="home_img"> </div>
+        	<div id="params_toggle"> </div>
+        	<div id="params_slider"> </div>
+	</div>
+        </div>
+        <!-- full tab example -->
+
     </div>
 
 
     <div id="soundboard" class="tab-pane fade">
-      <h3>Menu 2</h3>
-      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
-	<!--
- <div class="container my-4">
+	<div class="my-augfiguration main not-front" data-augmented-ui="br-2-clip-x bl-clip-x border inlay" style="height:95vh"> 
+	<div class="container-fluid-bg" > <img src="/img/r2d2_bg.svg" alt="Italian Trulli" class="home_img"> </div>
+ 	<div class="content_tab">
     <div id="button-container" class="row g-2">
     </div>
     </div>
-	-->
+    </div>
     </div>
 
 
