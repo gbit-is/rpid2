@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-git_ssh_link="git@github.com:gbit-is/rpid2_.git"
-git_http_link="https://github.com/gbit-is/rpid2_.git"
+git_ssh_link="git@github.com:gbit-is/rpid2.git"
+git_http_link="https://github.com/gbit-is/rpid2.git"
 base_dir="/opt/rpid2"
 run_user="pi"
 run_group="pi"
