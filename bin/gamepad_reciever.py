@@ -4,13 +4,17 @@ import socket
 
 
 from common import *
-
 import Gamepad
+
+SEND_COMMANDS = True
+#SEND_COMMANDS = False
 
 HOST = "127.0.0.1"
 PORT = config.getint("ports","motor_server")
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
+
+if SEND_COMMANDS:
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((HOST, PORT))
 
 axis = { }
 axis["direction"] = config.getint("gamepad","direction")
@@ -42,6 +46,7 @@ def init_gamepad():
 def drive(*args):
 
 	gamepad_data = gamepad.axisMap
+	print(gamepad_data[axis["direction"]])
 	direction = round( ( gamepad_data[axis["direction"]] * 100 ) * axis["invert_direction"],2 )
 	turn = round( ( gamepad_data[axis["turn"]] * 100 )  * axis["invert_turn"],2 )
 
@@ -52,8 +57,10 @@ def drive(*args):
 		turn = 0
 		
 	msg = "drive," + str(direction) + "," + str(turn)
-	print(msg)
-	s.sendall(msg.encode())
+	if SEND_COMMANDS:
+		s.sendall(msg.encode())
+	else:
+		print(msg)
 
 	
 	
@@ -70,5 +77,14 @@ def manage_gamepad(gamepad):
 	gamepad.addAxisMovedHandler(axis["turn"],drive)
 
 
-gamepad = init_gamepad()
-manage_gamepad(gamepad)
+	while gamepad.isConnected():
+		time.sleep(2)
+
+	exit
+
+while True:
+	try:
+		gamepad = init_gamepad()
+		manage_gamepad(gamepad)
+	except Exception as e:
+		print(e)
