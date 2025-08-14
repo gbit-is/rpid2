@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.responses import JSONResponse
