@@ -8,12 +8,10 @@ source init.sh
 setup_basics() {
 
 
+	apt update
 	apt install python3 -y 
 	apt install python3-venv -y
 	apt install apache2 -y
-
-
-
 }
 
 setup_nanomq() {
@@ -98,9 +96,9 @@ setup_apache() {
 
 }
 
-
-#setup_venv
-#setup_nanomq
-#setup_zeodb
-#setup_rpid2_services
+setup_basics
+setup_venv
+setup_nanomq
+setup_zeodb
+setup_rpid2_services
 setup_apache
