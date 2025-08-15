@@ -1,23 +1,36 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+NIFS=$'\n'
+OIFS=$IFS
 
 cd $SCRIPT_DIR
 
 config_file="/etc/hostapd/hostapd.conf"
 config_file="$SCRIPT_DIR/hostapd.conf"
 
-current_line=$(grep "wpa_passphrase" $config_file)
-current_pass=$(echo "$current_line" | awk -F '=' '{print $2}')
 
-source ../venv/bin/activate
+#source ../venv/bin/activate
 
-new_pass=$(./list_configs.py network_config psk)
+configs="^wpa_passphrase,wpa_passphrase\n^ssid,ssid"
+configs=$(echo -e $configs)
 
-if [[ "$current_pass" == "$new_pass" ]]; then
-	echo "password is already configured"
-else
-	new_line="wpa_passphrase=$new_pass"
-	sed -i "s/$current_line/$new_line/" $config_file
+IFS=$NIFS
+for config in $configs;do
+	match=$(echo "$config" | awk -F ',' '{print $1}')
+	key=$(echo "$config" | awk -F ',' '{print $2}')
 
-fi
+	config_line=$(grep "$match" $config_file)
+	old_value=$(echo "$config_line" | awk -F '=' '{print $2}')
+	new_value=$(./list_configs.py network_config $key)
+
+	if [[ "$old_value" == "$new_value" ]];then
+		echo "$key is set correctly"
+
+	else
+		echo "setting new value for $key"
+		new_line="${key}=${new_value}"
+		sed -i "" "s/$config_line/$new_line/" $config_file
+	fi
+
+done
