@@ -1,0 +1,13 @@
+[Unit]
+Description=Manage RPID2 motor controllers
+After=rpid2_motor_server.service
+
+ 
+[Service]
+User=pi
+WorkingDirectory=/opt/rpid2/bin
+ExecStart=sh -c ". ../venv/bin/activate; ./gamepad_reciever.py"
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=gamepad_reciever.service

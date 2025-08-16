@@ -1,0 +1,13 @@
+[Unit]
+Description=Manage RPID2 motor controllers
+After=zeodb.service
+
+ 
+[Service]
+User=pi
+WorkingDirectory=/opt/rpid2/bin
+ExecStart=sh -c ". ../venv/bin/activate; ./motor_server.py"
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=motor_server.service
