@@ -8,6 +8,17 @@ from common import *
 
 import Gamepad
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 
 def initGamepad():
@@ -27,55 +38,46 @@ def initGamepad():
 
 	return gamepad
 
-def initUART():
-	serial_port = config.get("motor_controller","serial_port")
-	serial_baud = config.getint("motor_controller","serial_baud")
 
-	print("Connecting to mototor controller (UART)")
-
-	uart_not_ready = True
-
-	while uart_not_ready:
-		try:
-			UART = serial.Serial (serial_port, serial_baud)    #Open port with baud rate
-			uart_not_ready = False
-			
-		except Exception as e:
-			print("Unable to connect to motor controller (UART)")
-			print("Error is:")
-			print(e)
-			print("will retry in N seconds")
-			time.sleep(2)
-
-	print("Connected to motor controller")
-	return UART
-
-
-	
-
-def manage_gamepad():
+def manage_gamepad(print_axis,print_keys):
 
 
 	gamepad = initGamepad()
 
 
 
-	old_axis_data = gamepad.axisMap	
+	#x = gamepad.movedEventMap
+	#print(x)
+
+
 
 	while True:
 		axis_data = gamepad.axisMap	
-
-		for a in axis_data:
-			v = round(axis_data[a],2)
-			print(a,str(v).ljust(8),end="")
+		key_data = gamepad.pressedMap
 			
-		print()
-			
+		if print_keys:
 
+			for key in key_data:
+				key_val = key_data[key]
+			
+				if key_val:
+					print(bcolors.OKGREEN + str(key).ljust(4) + bcolors.ENDC, end="")
+				else:
+					print(bcolors.OKBLUE + str(key).ljust(4) + bcolors.ENDC, end="")
+
+		if print_axis:
+			for axis in axis_data:
+				axis_num = axis_data[axis]
+				axis_num = round(axis_num,2)
+				print(bcolors.OKBLUE + str(axis).ljust(2) + bcolors.ENDC +  str(axis_num).ljust(6),end="")
+			print()
+				
 		time.sleep(0.5)
 
 
         
-		
+print_axis = True
+print_keys = False
+	
 
-manage_gamepad()
+manage_gamepad(print_axis,print_keys)
