@@ -18,6 +18,16 @@ import time
 import threading
 import inspect
 
+
+PD = False
+#PD = True
+
+def pd(msg):
+	if PD:
+		print(msg)
+	
+
+
 def available(joystickNumber = 0):
     """Check if a joystick is connected and ready to use."""
     joystickPath = '/dev/input/js' + str(joystickNumber)
@@ -193,14 +203,17 @@ class Gamepad:
                 finalValue = False
                 self.wasReleasedMap[index] = True
                 for callback in self.releasedEventMap[index]:
+                    pd("A")
                     callback()
             else:
                 finalValue = True
                 self.wasPressedMap[index] = True
                 for callback in self.pressedEventMap[index]:
+                    pd("B")
                     callback()
             self.pressedMap[index] = finalValue
             for callback in self.changedEventMap[index]:
+                pd("C")
                 callback(finalValue)
         elif eventType == Gamepad.EVENT_CODE_AXIS:
             eventName = Gamepad.EVENT_AXIS
@@ -211,6 +224,7 @@ class Gamepad:
             finalValue = value / Gamepad.MAX_AXIS
             self.axisMap[index] = finalValue
             for callback in self.movedEventMap[index]:
+                pd("D")
                 callback(finalValue)
         elif eventType == Gamepad.EVENT_CODE_INIT_BUTTON:
             eventName = Gamepad.EVENT_BUTTON
@@ -257,20 +271,26 @@ class Gamepad:
                 finalValue = False
                 self.wasReleasedMap[index] = True
                 for callback in self.releasedEventMap[index]:
-                    callback()
+                    pd("E")
+                    #Modded line, originally no callback value
+                    callback(finalValue,index)
             else:
                 finalValue = True
                 self.wasPressedMap[index] = True
                 for callback in self.pressedEventMap[index]:
-                    callback()
+                    pd("F")
+                    #Modded line, originally no callback value
+                    callback(finalValue,index)
             self.pressedMap[index] = finalValue
             for callback in self.changedEventMap[index]:
                 #Modded line, originally it is just finalValue
+                pd("G")
                 callback(finalValue,index)
         elif eventType == Gamepad.EVENT_CODE_AXIS:
             finalValue = value / Gamepad.MAX_AXIS
             self.axisMap[index] = finalValue
             for callback in self.movedEventMap[index]:
+                pd("H")
                 callback(finalValue)
         elif eventType == Gamepad.EVENT_CODE_INIT_BUTTON:
             if value == 0:
