@@ -182,6 +182,8 @@ class Gamepad:
         entityName = None
         finalValue = None
         if eventType == Gamepad.EVENT_CODE_BUTTON:
+		
+		
             eventName = Gamepad.EVENT_BUTTON
             if index in self.buttonNames:
                 entityName = self.buttonNames[index]
@@ -263,7 +265,8 @@ class Gamepad:
                     callback()
             self.pressedMap[index] = finalValue
             for callback in self.changedEventMap[index]:
-                callback(finalValue)
+                #Modded line, originally it is just finalValue
+                callback(finalValue,index)
         elif eventType == Gamepad.EVENT_CODE_AXIS:
             finalValue = value / Gamepad.MAX_AXIS
             self.axisMap[index] = finalValue
@@ -482,6 +485,24 @@ class Gamepad:
             raise ValueError('Button %i was not found' % buttonIndex)
         except ValueError:
             raise ValueError('Button name %s was not found' % buttonName)
+
+
+    def addNamedButtonChangedHandler(self, buttonName, callback):
+        """Adds a callback for when a specific button specified by name or index changes.
+        This callback gets a boolean for the button pressed state."""
+        try:
+
+            if buttonName in self.buttonIndex:
+                buttonIndex = self.buttonIndex[buttonName]
+            else:
+                buttonIndex = int(buttonName)
+            if callback not in self.changedEventMap[buttonIndex]:
+                self.changedEventMap[buttonIndex].append(callback)
+        except KeyError:
+            raise ValueError('Button %i was not found' % buttonIndex)
+        except ValueError:
+            raise ValueError('Button name %s was not found' % buttonName)
+
 
     def removeButtonChangedHandler(self, buttonName, callback):
         """Removes a callback for when a specific button specified by name or index changes."""
