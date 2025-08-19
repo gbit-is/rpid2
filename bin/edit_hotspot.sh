@@ -7,7 +7,6 @@ OIFS=$IFS
 cd $SCRIPT_DIR
 
 config_file="/etc/hostapd/hostapd.conf"
-config_file="../setup/config_files/hostapd.conf"
 
 
 source ../venv/bin/activate
@@ -30,7 +29,7 @@ for config in $configs;do
 	else
 		echo "setting new value for $key"
 		new_line="${key}=${new_value}"
-		sed -i "" "s/$config_line/$new_line/" $config_file
+		sudo sed -i "s/$config_line/$new_line/" $config_file
 	fi
 
 done
