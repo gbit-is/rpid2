@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+
+if [[ "$(whoami)" != "root" ]];then
+	echo "script must be run as root"
+	exit 1
+fi
+
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 source init.sh
@@ -32,7 +39,6 @@ setup_nanomq() {
 
 	echo "placing nanomq service file"
 	sudo cp $base_dir/setup/service_files/nanomq.service /etc/systemd/system/nanomq.service
-	sudo systemctl enable nanomq --now
 
 
 }
@@ -50,24 +56,31 @@ setup_venv() {
 
 setup_zeodb() {
 	sudo cp $base_dir/setup/service_files/zeodb.service /etc/systemd/system/zeodb.service
-	sudo systemctl enable zeodb --now
 
 }
 
 setup_rpid2_services() {
 
-	# Init zeodb, runs once on boot
-	sudo cp $base_dir/setup/service_files/zeodb_init.service /etc/systemd/system/zeodb_init.service
-	#sudo systemctl enable zeodb_init --now
+	# 	
+	#sudo cp $base_dir/setup/service_files/zeodb_init.service /etc/systemd/system/zeodb_init.service
 
 
-	# setup the audio management server
+	# add the audio server to systemd 
 	sudo cp $base_dir/setup/service_files/rpid2_audio_server.service /etc/systemd/system/rpid2_audio_server.service
-	#sudo systemctl enable rpid2_audio_server --now
 
-	# run the fastapi process
+	# add the fastapi server to systemd
 	sudo cp $base_dir/setup/service_files/rpid2_api_server.service /etc/systemd/system/rpid2_api_server.service
-	sudo systemctl enable rpid2_api_server --now
+
+	# add the motor server to systemd
+	sudo cp $base_dir/setup/service_files/rpid2_motor_server.service /etc/systemd/system/rpid2_motor_server.service
+
+
+	# add the rpid2 gamepad reciever to systemd
+	sudo cp $base_dir/setup/service_files/rpid2_gamepad_reciever.service /etc/systemd/system/rpid2_gamepad_reciever.service
+
+
+
+	
 
 }
 
