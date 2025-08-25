@@ -5,12 +5,10 @@ NIFS=$'\n'
 OIFS=$IFS
 
 cd $SCRIPT_DIR
-
-config_file="/etc/hostapd/hostapd.conf"
-
-
+cd ..
 source ../venv/bin/activate
 
+config_file="/etc/hostapd/hostapd.conf"
 configs="^wpa_passphrase,wpa_passphrase\n^ssid,ssid"
 configs=$(echo -e $configs)
 
