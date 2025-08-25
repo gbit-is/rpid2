@@ -96,9 +96,11 @@ setup_apache() {
 
 }
 
-setup_basics
-setup_venv
-setup_nanomq
-setup_zeodb
-setup_rpid2_services
-setup_apache
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]];then
+	setup_basics
+	setup_venv
+	setup_nanomq
+	setup_zeodb
+	setup_rpid2_services
+	setup_apache
+fi
