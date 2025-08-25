@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+
+
+if [[ "$(whoami)" != "root" ]];then
+	echo "script must be run as root"
+	exit 1
+fi
+
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 source init.sh
@@ -34,5 +42,11 @@ add_conf_files(){
 
 }
 
+### not set up as a standalone service
+#add_service(){
+	#sudo cp $base_dir/setup/service_files/rpid2_hotspot.service /etc/systemd/system/rpid2_hotspot.service
+#}
+
 install_packages
 add_conf_files
+#add_service
