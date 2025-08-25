@@ -9,7 +9,7 @@ cd ..
 source ../venv/bin/activate
 
 config_file="/etc/hostapd/hostapd.conf"
-configs="^wpa_passphrase,wpa_passphrase\n^ssid,ssid"
+configs="^wpa_passphrase,wpa_passphrase\n^ssid,ssid\ncountry_code,country_code"
 configs=$(echo -e $configs)
 
 IFS=$NIFS
@@ -31,3 +31,16 @@ for config in $configs;do
 	fi
 
 done
+
+
+raspi_wifi_country=$(raspi-config nonint get_wifi_country)
+expected_country=$(./list_configs.py network_config country_code)
+
+if [[ "$raspi_wifi_country" != "$expected_country" ]];then
+	echo "Fixing raspi-config country setting"
+	raspi-config nonint do_wifi_country $expected_country
+else
+	echo "raspi-config country setting is correct"
+fi
+
+
