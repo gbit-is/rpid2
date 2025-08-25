@@ -1,0 +1,12 @@
+[Unit]
+Description=rpid2 service
+After=syslog.target
+ 
+[Service]
+User=root
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/opt/rpid2/bin/start_all.sh
+ 
+[Install] 
+WantedBy=multi-user.target
