@@ -71,7 +71,7 @@ async function generate_soundboard(debug) {
 		data = await list_sounds();
 	}
 
-	console.log(data)	
+	//console.log(data)	
 
 	const buttonContainer = document.getElementById("button-container");
 
@@ -109,7 +109,7 @@ async function generate_soundboard(debug) {
 			//category.appendChild(col);
 			row_div.appendChild(col);
 			col_count++;
-			console.log(col_count)
+			//console.log(col_count)
 			if ( col_count == col_max ){
 				category.appendChild(row_div)
 				row_div = document.createElement("div")
