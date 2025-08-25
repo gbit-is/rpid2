@@ -26,7 +26,7 @@ fi
 nmcli radio | grep "disabled" > /dev/null
 if [ $? -eq 0 ];then
 	echo "wifi is disabled in nmcli,enabling it"
-	#nmcli radio wifi on
+	nmcli radio wifi on
 fi
 
 

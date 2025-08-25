@@ -8,7 +8,7 @@ fi
 
 
 
-#/opt/rpid2/bin/hotspot/hotspot.sh
+/opt/rpid2/bin/hotspot/hotspot.sh
 
 # Start ZEODB
 systemctl start zeodb
