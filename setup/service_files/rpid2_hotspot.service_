@@ -1,0 +1,12 @@
+[Unit]
+Description=start hotspot if needed
+After=syslog.target
+ 
+[Service]
+User=root
+WorkingDirectory=/opt/rpid2/bin/hotspot
+ExecStart=/opt/rpid2/bin/hotspot/hotspot.sh
+ 
+[Install] 
+WantedBy=multi-user.target
+Alias=hotspot.service
