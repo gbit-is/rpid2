@@ -1,5 +1,32 @@
   //let output = document.getElementById("output");
 //let steamdeck_icon_img = document.getElementById("steamdeck_icon")
+
+//const apiPort = 9000;  // or whatever your API runs on
+
+function send_gamepad(data){
+    let apiPath = '/drive';
+    let url = `http://${window.location.hostname}:${apiPort}${apiPath}`;
+        fetch(url, {
+                method: "POST",
+        	body: data
+        })
+        .then(response => {
+        if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+        }
+                return response.json(); // or response.text() if you're not expecting JSON
+        })
+        .then(data => {
+                console.log("Response received:", data);
+        })
+                .catch(error => {
+        console.error("Error during fetch:", error);
+        });
+
+
+}
+
+
  let prevState = {};
 
     function gameLoop() {
@@ -40,6 +67,7 @@
 		dict_json = JSON.stringify(key_dict);
 		//console.log(dict_json)
 		console.log(key_dict)
+		send_gamepad(dict_json)
 	}
 	
       }
