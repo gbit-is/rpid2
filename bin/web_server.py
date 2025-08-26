@@ -13,9 +13,38 @@ from mqttclient import *
 from common import *
 from typing import Optional
 from json_db import *
+from gamepad_reciever import *
+
+
+class c_socket():
+
+	def __init__(self):
+		self.socket = None
+		self.create()
+	def create(self):
+		try:
+			self.socket = create_socket()
+		except Exception as e:
+			print(e)
+			self.socket = None
+	def renew(self):
+		self.__init__()
+
+USE_STEAMDECK = False
+if "steamdeck" in config:
+	USE_STEAMDECK = True
+	from gamepad_reciever import *
+	m_socket = c_socket()
+	axis = get_axis("steamdeck")
+
+	keys = { }
+	if config.has_section("steamdeck_keys"):
+		for key in config["steamdeck_keys"]:
+			keys[key] = config.get("steamdeck_keys",key)
+
+
 
 logger = get_logger("web-server")
-#logging.getLogger().setLevel(logging.DEBUG)
 
 jdb = json_db()
 app = FastAPI()
@@ -145,4 +174,38 @@ async def set_config_path(
 
 	mqc = mqttclient()
 	x = mqc.send(body,topic=topic)
+	return "ACK"
+
+
+@app.post("/drive")
+async def drive(
+    body: Optional[str] = Body(None)
+):
+
+	if not USE_STEAMDECK:
+		return "steamdeck not configured"
+
+
+	try:
+		http_drive(body,axis,m_socket.socket)
+	except Exception as e:
+		m_socket.renew()
+		http_drive(body,axis,m_socket.socket)
+
+	body = json.loads(body)	
+	for button in body["buttons"]:
+		if button in keys:
+			action,state = keys[button].split(":")
+			pressed = body["buttons"][button]
+			if pressed:
+				pressed = "True"
+			else:
+				pressed = "False"
+			if state.lower() == pressed.lower():
+				if action == "mqtt":
+					topic = config.get("steamdeck_mqtt",gamepad_key + "_topic")
+					msg = config.get("steamdeck_mqtt",gamepad_key + "_message")
+					mqc = mqttclient()
+					mqc.send(msg,topic=topic)
+
 	return "ACK"

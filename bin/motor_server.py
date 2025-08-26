@@ -85,6 +85,7 @@ def initUart_from_config(config_section):
 def send_drive_command(left_motor,right_motor,uart_interface):
 
 	msg = "|" + str(left_motor) + "," + str(right_motor) + "@"
+	#print(msg)
 	uart_interface.write(msg.encode())
 	
 def send_dome_command(rotate,uart_interface):
@@ -97,6 +98,7 @@ def send_dome_command(rotate,uart_interface):
 
 def parse_data(data):
 	data = data.decode()
+	print(data)
 	if data.startswith("drive"):
 		data = data.split(",")
 		direction = float(data[1])
@@ -115,41 +117,50 @@ def parse_data(data):
 				send_dome_command(rotate,dome_motor_uart)
 		return
 	
+
 motor_limits = motor_limits_class()
 
 t = threading.Thread(target=update_motor_val, args=(limit_fetch_rate,), daemon=True)
 t.start()
 
+if __name__ == "__main__":
 
-while True:
+	while True:
 
-	HAS_DOME_CONTROLLER = False
+		HAS_DOME_CONTROLLER = False
 
-	try:
+		#try:
+		if True:
 
-		drive_motor_uart = initUart_from_config("motor_controller")
-		if "dome_controller" in config:
-			try:
-				dome_motor_uart = initUart_from_config("dome_controller")
-				HAS_DOME_CONTROLLER = True
-			except Exception as e:
-				logger.error("Can't connect to dome controller")
-				logger.error(e)
+			drive_motor_uart = initUart_from_config("motor_controller")
+			if "dome_controller" in config:
+				try:
+					dome_motor_uart = initUart_from_config("dome_controller")
+					HAS_DOME_CONTROLLER = True
+				except Exception as e:
+					logger.error("Can't connect to dome controller")
+					logger.error(e)
 			
 		
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
-			s.bind((HOST, PORT))
-			s.listen()
-			conn, addr = s.accept()
-			with conn:
-				print(f"Connected by {addr}")
-				while True:
-					data = conn.recv(1024)
-					if not data:
-						break
-					parse_data(data)
+			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+				s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+				s.bind((HOST, PORT))
+				s.listen()
+				conn, addr = s.accept()
+				with conn:
+					print(f"Connected by {addr}")
+					while True:
+						data = conn.recv(1024)
+						if not data:
+							break
+						if b"\n" in data:
+							for entry in data.split(b"\n"):
+								if entry != b'':
+									parse_data(entry)
+						else:
+							parse_data(data)
 			
-	except Exception as e:
-		print("Error:")
-		print(e)
+		#except Exception as e:
+		else:
+			print("Error:")
+			print(e)

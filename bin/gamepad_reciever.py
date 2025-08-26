@@ -4,6 +4,8 @@ import socket
 from common import *
 import Gamepad
 from mqttclient import *
+import select
+
 
 logger = get_logger("gamepad_reciever")
 
@@ -15,22 +17,31 @@ PORT = config.getint("ports","motor_server")
 
 
 # Get the static parameters from rpid2.conf
-axis = { }
-axis["direction"] = config.getint("gamepad","direction")
-axis["turn"] = config.getint("gamepad","turn")
-axis["invert_direction"] =  config.getint("gamepad","invert_dir")
-axis["invert_turn"] =  config.getint("gamepad","invert_turn")
-axis["deadzone"] = config.getint("gamepad","deadzone")
+def get_axis(section):
+	axis = { }
+	axis["direction"] = config.getint(section,"direction")
+	axis["turn"] = config.getint(section,"turn")
+	axis["invert_direction"] =  config.getint(section,"invert_dir")
+	axis["invert_turn"] =  config.getint(section,"invert_turn")
+	axis["deadzone"] = config.getint(section,"deadzone")
 
-if config.has_option("gamepad","dome_right"):
-	axis["dome"] = { }
-	axis["dome"]["dome_right"] = config.getint("gamepad","dome_right")
-	axis["dome"]["dome_left"] = config.getint("gamepad","dome_left")
-	axis["dome"]["deadzone"] = config.getint("gamepad","dome_deadzone")
-	if config.has_option("gamepad","dome_trigger"):
-		axis["dome"]["trigger"] = config.getboolean("gamepad","dome_trigger")
-	else:
-		axis["dome"]["trigger"] = False
+	if config.has_option(section,"dome_right"):
+		axis["dome"] = { }
+		axis["dome"]["dome_right"] = config.getint(section,"dome_right")
+
+		if config.has_option(section,"dome_left"):
+			axis["dome"]["dome_left"] = config.getint(section,"dome_left")
+		else:
+			axis["dome"]["dome_left"] = None
+
+		axis["dome"]["deadzone"] = config.getint(section,"dome_deadzone")
+		if config.has_option(section,"dome_trigger"):
+			axis["dome"]["trigger"] = config.getboolean(section,"dome_trigger")
+		else:
+			axis["dome"]["trigger"] = False
+
+
+	return axis
 
 
 
@@ -96,6 +107,35 @@ def drive(*args):
 	s.sendall(msg.encode())
 
 
+def http_drive(data,axis,s):
+
+	data = json.loads(data)
+	gamepad_data = data["axis"]
+
+
+
+	direction = round( ( gamepad_data[str(axis["direction"])] * 100 ) * axis["invert_direction"],2 )
+	turn = round( ( gamepad_data[str(axis["turn"])] * 100 )  * axis["invert_turn"],2 )
+	if abs(direction) < axis["deadzone"]:
+		direction = 0
+	if abs(turn) < axis["deadzone"]:
+		turn = 0
+
+	if abs(direction) + abs(turn) > 0:
+		msg = "drive," + str(direction) + "," + str(turn) + "\n"
+		s.sendall(msg.encode())
+
+	if "dome" in axis:
+		dome_rotate = gamepad_data[str(axis["dome"]["dome_right"])]
+		dome_rotate = dome_rotate * 100
+		
+		#if abs(dome_rotate) > axis["dome"]["deadzone"]:
+		msg = "dome,rotate," + str(int(dome_rotate)) + "\n"
+		s.sendall(msg.encode())
+		print(msg)
+	
+
+
 def rotate_dome(*args):
 
 	gamepad_data = gamepad.axisMap
@@ -122,7 +162,7 @@ def rotate_dome(*args):
 	else:
 		dome_value = dome_right * -1
 
-	msg = "dome,rotate," + str(round(dome_value,2))
+	msg = "dome,rotate," + str(round(dome_value,0))
 	print(msg)
 	s.sendall(msg.encode())
 
@@ -234,45 +274,48 @@ for gamepad_key in config["gamepad_keys"]:
 
 
 
-while True:
+if __name__ == "__main__":
+	axis = get_axis("gamepad")
 
-	socket_ready = False
-	error_count=0
-	max_error_count=10
-	error_interval_count=0	
-	error_interval_print=10
+	while True:
 
-	while not socket_ready:
-		try:
-			s = create_socket()
-			socket_ready = True
-			print("Connected to motor server")
-		except Exception as e:
-			if error_count > max_error_count:
-				if error_interval_count == error_interval_print:
-					print_err(e)
-					error_interval_count=0
+		socket_ready = False
+		error_count=0
+		max_error_count=10
+		error_interval_count=0	
+		error_interval_print=10
+
+		while not socket_ready:
+			try:
+				s = create_socket()
+				socket_ready = True
+				print("Connected to motor server")
+			except Exception as e:
+				if error_count > max_error_count:
+					if error_interval_count == error_interval_print:
+						print_err(e)
+						error_interval_count=0
+					else:
+						error_interval_count += 1				
+
+
 				else:
-					error_interval_count += 1				
-
-
-			else:
-				print_err(e)
+					print_err(e)
 				
-			time.sleep(1)
-			error_count += 1
+				time.sleep(1)
+				error_count += 1
 
-	s_time = time.time()
-	try:
-		gamepad = init_gamepad()
-		manage_gamepad(gamepad)
-	except Exception as e:
-		logger.error("manage gamepad loop went down with error:")
-		logger.error(e)
+		s_time = time.time()
+		try:
+			gamepad = init_gamepad()
+			manage_gamepad(gamepad)
+		except Exception as e:
+			logger.error("manage gamepad loop went down with error:")
+			logger.error(e)
 
 
-		e_time = time.time()
-		if e_time < 10:
-			time.sleep(2)
+			e_time = time.time()
+			if e_time < 10:
+				time.sleep(2)
 
 		
