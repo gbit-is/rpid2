@@ -172,6 +172,8 @@ div.container-fluid-logo div.jumbotron{position:relative;z-index:5;color:white;}
 
 }
 
+
+
 .cool_box {
     --aug-clip-tl1: initial;
     --aug-round-tr1: initial;
@@ -195,4 +197,16 @@ div.container-fluid-logo div.jumbotron{position:relative;z-index:5;color:white;}
     margin: 0.25rem auto;
     font-size: 0.75rem;
     background: url(/img/chubie.png) right 30px bottom 10px / auto 75% no-repeat;
+}
+
+
+.page {
+	min-height:95vh;
+	height:fit-content;
+}
+
+.steamdeck_div {
+  display: flex;
+  justify-content: center; 
+  align-items: center;
 }
