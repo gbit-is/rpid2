@@ -53,8 +53,7 @@ function send_gamepad(data){
 
         // --- Axes (sticks) ---
         gp.axes.forEach((axis, i) => {
-          let value = axis.toFixed(2);
-	  //console.log(axis,i)	 
+          let value = parseFloat(axis.toFixed(2));
 	  axis_dict[i] = value;
           if (prevState[`a${i}`] !== value) {
 	    change_occured = true;
@@ -62,12 +61,15 @@ function send_gamepad(data){
 	    //console.log(value, i )
           }
         });
+	//axis_dict = JSON.stringify(axis_dict)
 	key_dict["axis"] = axis_dict;
 	if (change_occured) {
 		dict_json = JSON.stringify(key_dict);
 		//console.log(dict_json)
-		console.log(key_dict)
+		//console.log(key_dict)
 		send_gamepad(dict_json)
+		console.log(key_dict)
+		//console.log(dict_json)
 	}
 	
       }
