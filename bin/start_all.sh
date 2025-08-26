@@ -10,6 +10,14 @@ fi
 
 /opt/rpid2/bin/hotspot/hotspot.sh
 
+cd /opt/rpid2/bin
+source ../venv/bin/activate
+
+./list_configs.py sound_card run_sound_card_fixer | grep -i "True" > /dev/null
+if [ $? -eq 0 ];then
+	./sound_card_fixer.sh
+fi
+
 # Start ZEODB
 systemctl start zeodb
 
