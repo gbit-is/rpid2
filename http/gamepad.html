@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gamepad Test</title>
+</head>
+<body>
+  <h1>Press buttons or move sticks</h1>
+  <pre id="output"></pre>
+
+  <script>
+    let output = document.getElementById("output");
+
+    function gameLoop() {
+      // Get list of connected gamepads
+      let gamepads = navigator.getGamepads();
+
+      if (gamepads[0]) {
+        let gp = gamepads[0]; // first gamepad
+        //let info = "";
+
+        // Buttons
+        //gp.buttons.forEach((btn, i) => {
+        //  info += `Button ${i}: ${btn.pressed ? "Pressed" : "Released"}\n`;
+        //});
+
+        // Axes (sticks, triggers)
+        //gp.axes.forEach((axis, i) => {
+         // info += `Axis ${i}: ${axis.toFixed(2)}\n`;
+        //});
+
+        //output.textContent = info;
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.addEventListener("gamepadconnected", (e) => {
+      console.log("Gamepad connected:", e.gamepad);
+      requestAnimationFrame(gameLoop);
+    });
+
+    window.addEventListener("gamepaddisconnected", (e) => {
+      console.log("Gamepad disconnected:", e.gamepad);
+    });
+  </script>
+</body>
+</html>
+
