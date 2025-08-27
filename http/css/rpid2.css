@@ -205,12 +205,13 @@ div.container-fluid-logo div.jumbotron{position:relative;z-index:5;color:white;}
 	height:fit-content;
 }
 
-.steamdeck_div {
+.banner_div {
   display: flex;
   justify-content: center; 
   align-items: center;
 }
-.steamdeck_img{
+.banner_img{
   max-height: 50%;
   max-width: 50%;
+  height: 15pt;
 }
