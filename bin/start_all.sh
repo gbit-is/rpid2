@@ -31,11 +31,12 @@ source ../venv/bin/activate; ./bootstrap.py
 # start NanoMQ
 systemctl start nanomq
 
-# start the API server
-systemctl start rpid2_api_server.service
 
 # Start the motor server
 systemctl start rpid2_motor_server.service
+
+# start the API server
+systemctl start rpid2_api_server.service
 
 # start the audio server
 systemctl start rpid2_audio_server.service
@@ -44,4 +45,5 @@ systemctl start rpid2_audio_server.service
 systemctl start rpid2_gamepad_reciever.service
 
 
-
+# re-start the motor reciever because of some stupid bug I havent debugged yet
+systemctl restart rpid2_motor_server.service
