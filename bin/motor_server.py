@@ -129,8 +129,7 @@ if __name__ == "__main__":
 
 		HAS_DOME_CONTROLLER = False
 
-		#try:
-		if True:
+		try:
 
 			drive_motor_uart = initUart_from_config("motor_controller")
 			if "dome_controller" in config:
@@ -160,7 +159,6 @@ if __name__ == "__main__":
 						else:
 							parse_data(data)
 			
-		#except Exception as e:
-		else:
-			print("Error:")
-			print(e)
+		except Exception as e:
+			logger.error("Motor server Error:")
+			logger.error(e)
