@@ -48,7 +48,12 @@ logger = get_logger("web-server")
 
 jdb = json_db()
 app = FastAPI()
-mqc = mqttclient()
+try:
+	mqc = mqttclient()
+except Exception as e:
+	logger.error("UNABLE TO CONNECT TO MQTT")
+	logger.error(e)
+	
 
 
 
