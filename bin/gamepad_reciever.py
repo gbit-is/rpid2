@@ -105,6 +105,7 @@ def drive(*args):
 	# the packet is by design small and simple "drive,100,0" is full speed forwards for example
 	msg = "drive," + str(direction) + "," + str(turn)
 	s.sendall(msg.encode())
+	s.sendall(b"\n")
 
 
 def http_drive(data,axis,s):
@@ -123,6 +124,7 @@ def http_drive(data,axis,s):
 
 	if abs(direction) + abs(turn) > 0:
 		msg = "drive," + str(direction) + "," + str(turn) + "\n"
+		print("SENDING DRIIIIIVE")
 		s.sendall(msg.encode())
 
 	if "dome" in axis:
@@ -165,6 +167,7 @@ def rotate_dome(*args):
 	msg = "dome,rotate," + str(round(dome_value,0))
 	print(msg)
 	s.sendall(msg.encode())
+	s.sendall(b"\n")
 
 	
 
