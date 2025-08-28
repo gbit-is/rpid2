@@ -9,8 +9,10 @@ cd ..
 source ../venv/bin/activate
 
 config_file="/etc/hostapd/hostapd.conf"
-configs="^wpa_passphrase,wpa_passphrase\n^ssid,ssid\ncountry_code,country_code"
+configs="^wpa_passphrase,wpa_passphrase\n^ssid,ssid\ncountry_code,country_code\n^interface,interface\n^driver,driver"
 configs=$(echo -e $configs)
+
+configs=""
 
 IFS=$NIFS
 for config in $configs;do
@@ -44,3 +46,11 @@ else
 fi
 
 
+INTERFACE=$(./list_configs.py network_config interface)
+grep interface /etc/dnsmasq.conf | grep $INTERFACE > /dev/null
+if [ $? -ne 0 ];then
+	config_line=$(grep interface /etc/dnsmasq.conf)
+	new_line="interface=$INTERFACE"
+	echo "$config_line $new_line"
+	sudo sed -i "s/$config_line/$new_line/" /etc/dnsmasq.conf
+fi

@@ -33,7 +33,7 @@ fi
 
 
 has_wifi="False"
-try_wifi="True"
+try_wifi="False"
 wifi_checks=0
 
 while [[ "$try_wifi" == "True" ]];do
@@ -57,7 +57,7 @@ while [[ "$try_wifi" == "True" ]];do
 	if [ $? -eq 0 ];then
 		echo "a network interface is up"
 		echo "no need to continue"
-		exit 0 
+		#exit 0 
 		try_wifi="False"
 		has_wifi="True"
 	else
@@ -86,11 +86,11 @@ cd $SCRIPT_DIR
 echo "stopping onboard WIFI and starting hotspot"
 
 #sudo nmcli radio wifi off
-sudo pkill -x wpa_supplicant || true
-sleep 1
-sudo pkill -9 -x wpa_supplicant || true
-sudo ip link set wlan0 down
-sudo ip addr flush dev wlan0
+#sudo pkill -x wpa_supplicant || true
+#sleep 1
+#sudo pkill -9 -x wpa_supplicant || true
+#sudo ip link set wlan0 down
+#sudo ip addr flush dev wlan0
 
 
 
@@ -104,12 +104,14 @@ fi
 nmcli radio | grep "disabled" > /dev/null
 if [ $? -eq 0 ];then
 	echo "wifi is disabled in nmcli,enabling it"
-	#nmcli radio wifi on
+	nmcli radio wifi on
 fi
 
+cd ..
+WLAN=$(./list_configs.py network_config interface)
 
-sudo ip link set wlan0 up
-sudo ip addr add 192.168.4.1/24 dev wlan0
+sudo ip link set $WLAN up
+sudo ip addr add 192.168.4.1/24 dev $WLAN
 sudo systemctl start dnsmasq
 sudo systemctl start hostapd
 
