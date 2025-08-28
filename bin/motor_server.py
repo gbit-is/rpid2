@@ -98,24 +98,32 @@ def send_dome_command(rotate,uart_interface):
 
 def parse_data(data):
 	data = data.decode()
-	print(data)
-	if data.startswith("drive"):
-		data = data.split(",")
-		direction = float(data[1])
-		turn = float(data[2])
-		left_motor,right_motor = calculate_motors(direction,turn)
-		send_drive_command(left_motor,right_motor,drive_motor_uart)
-		return
-	elif data.startswith("ping"):
-		logger.debug("pong")
-		return
-	elif data.startswith("dome"):
-		if HAS_DOME_CONTROLLER:
+
+	try:
+		if data.startswith("drive"):
 			data = data.split(",")
-			if data[1] == "rotate":
-				rotate = data[2]
-				send_dome_command(rotate,dome_motor_uart)
-		return
+			direction = float(data[1])
+			turn = float(data[2])
+			left_motor,right_motor = calculate_motors(direction,turn)
+			send_drive_command(left_motor,right_motor,drive_motor_uart)
+			return
+		elif data.startswith("ping"):
+			logger.debug("pong")
+			return
+		elif data.startswith("dome"):
+			if HAS_DOME_CONTROLLER:
+				data = data.split(",")
+				if data[1] == "rotate":
+					rotate = data[2]
+					send_dome_command(rotate,dome_motor_uart)
+			return
+	except Exception as e:
+		logger.error("ERROR OCCURED IN PARSING COMMAND !!!")
+		logger.error(e)
+		logger.error(data)
+		send_drive_command(0,0,drive_motor_uart)
+		if HAS_DOME_CONTROLLER:
+			send_dome_command(0,dome_motor_uart)
 	
 
 motor_limits = motor_limits_class()
