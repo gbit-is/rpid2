@@ -110,6 +110,8 @@ fi
 cd ..
 WLAN=$(./list_configs.py network_config interface)
 
+echo "$WLAN"
+echo "......"
 sudo ip link set $WLAN up
 sudo ip addr add 192.168.4.1/24 dev $WLAN
 sudo systemctl start dnsmasq

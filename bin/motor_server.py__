@@ -97,7 +97,7 @@ def send_dome_command(rotate,uart_interface):
 	uart_interface.write(dome_msg.encode())
 
 def parse_data(data):
-	#data = data.decode()
+	data = data.decode()
 
 	try:
 		if data.startswith("drive"):
@@ -156,18 +156,16 @@ if __name__ == "__main__":
 				conn, addr = s.accept()
 				with conn:
 					print(f"Connected by {addr}")
-					buffer = b""
 					while True:
 						data = conn.recv(256)
-						buffer += data
-						if b"\n" in buffer:
-							print(buffer)
-							for entry in buffer.split(b"\n"):
-								print(entry)
-								entry = entry.decode().strip()
-								if entry != '':
+						if not data:
+							break
+						if b"\n" in data:
+							for entry in data.split(b"\n"):
+								if entry != b'':
 									parse_data(entry)
-							buffer = b""
+						else:
+							parse_data(data)
 			
 		except Exception as e:
 			logger.error("Motor server Error:")

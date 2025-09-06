@@ -13,5 +13,6 @@ services=$(./list_configs.py  services)
 for service in $services;do
 	service_name=$(echo $service | awk -F ':' '{print $1}')
 
-	systemctl stop $service_name
+	echo $service_name
+	systemctl stop $service_name &
 done

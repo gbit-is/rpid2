@@ -79,6 +79,8 @@ def init_gamepad():
 # callback function when the drive axis change, only calls back with info of the axis being triggered
 def drive(*args):
 
+	print(args)
+
 	# Here we just collect 2 values, how much back/forth movement should be done, how much left/right movement should be done
 	# translating that to how much to drive each motor or if a motor is wired backwards or whatever, that is by design handled in the motor server itself
 
@@ -103,9 +105,10 @@ def drive(*args):
 		
 	# create the TCP packet to send to the motor server
 	# the packet is by design small and simple "drive,100,0" is full speed forwards for example
-	msg = "drive," + str(direction) + "," + str(turn)
+	msg = "drive," + str(direction) + "," + str(turn) + "\n"
+	#msg = msg.ljust(32)
 	s.sendall(msg.encode())
-	s.sendall(b"\n")
+	#s.sendall(b"\n")
 
 
 def http_drive(data,axis,s):
@@ -123,7 +126,7 @@ def http_drive(data,axis,s):
 		turn = 0
 
 	if abs(direction) + abs(turn) > 0:
-		msg = "drive," + str(direction) + "," + str(turn) + "\n"
+		msg = "drive," + str(direction) + "," + str(turn) + "\n" 
 		print("SENDING DRIIIIIVE")
 		s.sendall(msg.encode())
 
@@ -164,10 +167,10 @@ def rotate_dome(*args):
 	else:
 		dome_value = dome_right * -1
 
-	msg = "dome,rotate," + str(round(dome_value,0))
-	print(msg)
+	msg = "dome,rotate," + str(round(dome_value,0)) + "\n"
+	#msg = msg.ljust(32)
 	s.sendall(msg.encode())
-	s.sendall(b"\n")
+	#s.sendall(b"\n")
 
 	
 
@@ -229,7 +232,7 @@ def manage_gamepad(gamepad):
 
 		gamepad_connected = gamepad.isConnected()
 		try:
-			s.sendall(b"ping")
+			s.sendall(b"ping\n")
 		except socket.error as e:
 			logger.error("Socket disconnected(socket.error)")
 			logger.error(e)

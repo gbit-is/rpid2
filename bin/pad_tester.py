@@ -64,6 +64,7 @@ def manage_gamepad(print_axis,print_keys):
 					print(bcolors.OKGREEN + str(key).ljust(4) + bcolors.ENDC, end="")
 				else:
 					print(bcolors.OKBLUE + str(key).ljust(4) + bcolors.ENDC, end="")
+			print()
 
 		if print_axis:
 			for axis in axis_data:
@@ -76,8 +77,9 @@ def manage_gamepad(print_axis,print_keys):
 
 
         
-print_axis = True
-print_keys = False
+#print_axis = True
+print_axis = False
+print_keys = True
 	
 
 manage_gamepad(print_axis,print_keys)

@@ -7,6 +7,7 @@ from fastapi import Body
 from fastapi import Path as fastapi_path
 from audio_server import list_files_for_ui
 from mqttclient import *
+from services_status import *
 
 
 
@@ -43,6 +44,7 @@ if "steamdeck" in config:
 			keys[key] = config.get("steamdeck_keys",key)
 
 
+USE_STEAMDECK = False
 
 logger = get_logger("web-server")
 
@@ -169,6 +171,12 @@ async def list_config():
 	return JSONResponse(audio_files)
 
 
+@app.get("/services/status")
+async def check_services():
+	report = check_all_services()
+	return JSONResponse(report)
+
+
 @app.post("/mqtt/post/{topic}")
 async def set_config_path(
     topic: str,
@@ -194,6 +202,7 @@ async def drive(
 	try:
 		http_drive(body,axis,m_socket.socket)
 	except Exception as e:
+		print(e)
 		m_socket.renew()
 		http_drive(body,axis,m_socket.socket)
 
