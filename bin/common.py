@@ -28,9 +28,8 @@ logging.basicConfig(format="{asctime} - {name} - {levelname} - {message}",style=
 #logging.getLogger().setLevel(logging.DEBUG)
 
 def pprint(msg):
-	#print(json.dumps(msg,indent=2))
 	try:
-		print(json.dumps(msg,indent=2))
+		print(json.dumps(msg,indent=2,default=str))
 	except:
 		print(msg)
 
