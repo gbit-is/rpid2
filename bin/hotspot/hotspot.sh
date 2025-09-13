@@ -113,9 +113,13 @@ WLAN=$(./list_configs.py network_config interface)
 echo "$WLAN"
 echo "......"
 sudo ip link set $WLAN up
+sleep 1
 sudo ip addr add 192.168.4.1/24 dev $WLAN
+sleep 1
 sudo systemctl start dnsmasq
+sleep 1
 sudo systemctl start hostapd
+sleep 1
 
 
 
