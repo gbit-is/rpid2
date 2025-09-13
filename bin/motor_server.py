@@ -6,8 +6,14 @@ import socket
 import threading
 from common import *
 from json_db import *
+from motor_uart import *
+import asyncio
+from websockets.asyncio.server import serve
+from websockets.exceptions import ConnectionClosed  # base for OK+Error
+
 
 logger = get_logger("motor_server")
+logger.setLevel(logging.DEBUG)
 limit_fetch_rate = 2 # secends between fetches
 
 
@@ -57,36 +63,12 @@ def calculate_motors(direction,turn):
 
 	return left_motor, right_motor
 
-def initUART(serial_port,serial_baud):
+def send_drive_command(left_motor,right_motor):
 
-	logger.info("Connecting to mototor controller (UART)")
-
-
-	uart_ready = False
-	while not uart_ready:
-		try:
-			UART = serial.Serial (serial_port, serial_baud)    #Open port with baud rate
-			uart_ready = True
-			return UART
-
-		except Exception as e:
-			logger.error("Unable to connect UART\Error is:")
-			logger.error(str(e))
-			time.sleep(1)
-
-def initUart_from_config(config_section):
-
-	serial_port = config.get(config_section,"serial_port")
-	serial_baud = config.getint(config_section,"serial_baud")
-
-	return initUART(serial_port,serial_baud)
-
-
-def send_drive_command(left_motor,right_motor,uart_interface):
-
-	msg = "|" + str(left_motor) + "," + str(right_motor) + "@"
-	#print(msg)
-	uart_interface.write(msg.encode())
+	msg = f"drive:{left_motor},{right_motor}\n"
+	print(msg)
+	if motor_controllers["legs"]["enabled"]:
+		motor_controllers["legs"]["uart"].write(msg)
 	
 def send_dome_command(rotate,uart_interface):
 
@@ -105,7 +87,7 @@ def parse_data(data):
 			direction = float(data[1])
 			turn = float(data[2])
 			left_motor,right_motor = calculate_motors(direction,turn)
-			send_drive_command(left_motor,right_motor,drive_motor_uart)
+			send_drive_command(left_motor,right_motor)
 			return
 		elif data.startswith("ping"):
 			logger.debug("pong")
@@ -121,54 +103,60 @@ def parse_data(data):
 		logger.error("ERROR OCCURED IN PARSING COMMAND !!!")
 		logger.error(e)
 		logger.error(data)
-		send_drive_command(0,0,drive_motor_uart)
+		send_drive_command(0,0)
 		if HAS_DOME_CONTROLLER:
 			send_dome_command(0,dome_motor_uart)
 	
+
+
+async def handler(ws):
+	try:
+		async for msg in ws:       
+			parse_data(msg)
+	except ConnectionClosed:        
+		print("conn close")
+
+async def main():
+	async with serve(handler, "", PORT) as server:
+		await server.serve_forever()
 
 motor_limits = motor_limits_class()
 
 t = threading.Thread(target=update_motor_val, args=(limit_fetch_rate,), daemon=True)
 t.start()
 
+
+def init_controllers():
+	mcu_names = {'drive_controller': [{'version': 'v.0.9', 'id': '0123', 'path': '/dev/serial/by-id/usb-Raspberry_Pi_Pico_E660A49317642B24-if02'}]}
+	motor_controllers = { }
+
+	controllers = config["motor_controllers"]
+	for controller in controllers:
+		motor_controllers[controller] = { }
+		mcu_name = config.get("motor_controllers",controller)
+		if "false" in mcu_name.lower():
+			logger.warning(f"{controller} motor controller is disabled in config")
+			motor_controllers[controller]["enabled"] = False
+		elif mcu_name not in mcu_names:
+			logger.warning(f"{controller} motor controller not connected")
+			motor_controllers[controller]["enabled"] = False
+		else:
+			logger.info(f"{controller} motor controller found")
+			motor_controllers[controller]["enabled"] = True
+			motor_controllers[controller]["info"] = mcu_names[mcu_name]
+
+	for controller in motor_controllers:
+		c = motor_controllers[controller]
+		if c["enabled"]:
+			path = c["info"][0]["path"]
+			motor_controllers[controller]["uart"] = motor_uart(path,9600,logger)
+			
+	
+	return motor_controllers
+
 if __name__ == "__main__":
-
-	while True:
-
-		HAS_DOME_CONTROLLER = False
-
-		try:
-
-			drive_motor_uart = initUart_from_config("motor_controller")
-			if "dome_controller" in config:
-				try:
-					dome_motor_uart = initUart_from_config("dome_controller")
-					HAS_DOME_CONTROLLER = True
-				except Exception as e:
-					logger.error("Can't connect to dome controller")
-					logger.error(e)
-			
 		
-			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-				s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
-				s.bind((HOST, PORT))
-				s.listen()
-				conn, addr = s.accept()
-				with conn:
-					print(f"Connected by {addr}")
-					buffer = b""
-					while True:
-						data = conn.recv(256)
-						buffer += data
-						if b"\n" in buffer:
-							print(buffer)
-							for entry in buffer.split(b"\n"):
-								print(entry)
-								entry = entry.decode().strip()
-								if entry != '':
-									parse_data(entry)
-							buffer = b""
-			
-		except Exception as e:
-			logger.error("Motor server Error:")
-			logger.error(e)
+	motor_controllers = init_controllers()
+	asyncio.run(main())
+
+

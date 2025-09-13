@@ -5,6 +5,8 @@ from common import *
 import Gamepad
 from mqttclient import *
 import select
+#from websockets.sync.client import connect
+from websocket_client import ws_client
 
 
 logger = get_logger("gamepad_reciever")
@@ -44,12 +46,6 @@ def get_axis(section):
 	return axis
 
 
-
-# create a socket connection to the motor server
-def create_socket():
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((HOST, PORT))
-	return s 
 
 
 
@@ -107,38 +103,9 @@ def drive(*args):
 	# the packet is by design small and simple "drive,100,0" is full speed forwards for example
 	msg = "drive," + str(direction) + "," + str(turn) + "\n"
 	#msg = msg.ljust(32)
-	s.sendall(msg.encode())
-	#s.sendall(b"\n")
+	websocket.send(msg)
 
 
-def http_drive(data,axis,s):
-
-	data = json.loads(data)
-	gamepad_data = data["axis"]
-
-
-
-	direction = round( ( gamepad_data[str(axis["direction"])] * 100 ) * axis["invert_direction"],2 )
-	turn = round( ( gamepad_data[str(axis["turn"])] * 100 )  * axis["invert_turn"],2 )
-	if abs(direction) < axis["deadzone"]:
-		direction = 0
-	if abs(turn) < axis["deadzone"]:
-		turn = 0
-
-	if abs(direction) + abs(turn) > 0:
-		msg = "drive," + str(direction) + "," + str(turn) + "\n" 
-		print("SENDING DRIIIIIVE")
-		s.sendall(msg.encode())
-
-	if "dome" in axis:
-		dome_rotate = gamepad_data[str(axis["dome"]["dome_right"])]
-		dome_rotate = dome_rotate * 100
-		
-		#if abs(dome_rotate) > axis["dome"]["deadzone"]:
-		msg = "dome,rotate," + str(int(dome_rotate)) + "\n"
-		s.sendall(msg.encode())
-		print(msg)
-	
 
 
 def rotate_dome(*args):
@@ -169,8 +136,7 @@ def rotate_dome(*args):
 
 	msg = "dome,rotate," + str(round(dome_value,0)) + "\n"
 	#msg = msg.ljust(32)
-	s.sendall(msg.encode())
-	#s.sendall(b"\n")
+	websocket.send(msg)
 
 	
 
@@ -231,17 +197,6 @@ def manage_gamepad(gamepad):
 	while gamepad_connected and socket_connected:
 
 		gamepad_connected = gamepad.isConnected()
-		try:
-			s.sendall(b"ping\n")
-		except socket.error as e:
-			logger.error("Socket disconnected(socket.error)")
-			logger.error(e)
-			socket_connected = False
-		except Exception as e:
-			logger.error("Socket disconnected(generic exception)")
-			logger.error(e)
-			socket_connected = False
-
 		time.sleep(1)
 	raise Exception("manage gamepad crashed")
 
@@ -279,49 +234,26 @@ for gamepad_key in config["gamepad_keys"]:
 			logger.error(e)
 
 
+uri = f"ws://{HOST}:{PORT}"
+
+
+
 
 if __name__ == "__main__":
+
+	websocket = ws_client(uri,logger)
 	axis = get_axis("gamepad")
+	gamepad = init_gamepad()
+	manage_gamepad(gamepad)
+	try:
+		gamepad = init_gamepad()
+		manage_gamepad(gamepad)
+	except Exception as e:
+		logger.error("manage gamepad loop went down with error:")
+		logger.error(e)
 
-	while True:
-
-		socket_ready = False
-		error_count=0
-		max_error_count=10
-		error_interval_count=0	
-		error_interval_print=10
-
-		while not socket_ready:
-			try:
-				s = create_socket()
-				socket_ready = True
-				print("Connected to motor server")
-			except Exception as e:
-				if error_count > max_error_count:
-					if error_interval_count == error_interval_print:
-						print_err(e)
-						error_interval_count=0
-					else:
-						error_interval_count += 1				
-
-
-				else:
-					print_err(e)
-				
-				time.sleep(1)
-				error_count += 1
-
-		s_time = time.time()
-		try:
-			gamepad = init_gamepad()
-			manage_gamepad(gamepad)
-		except Exception as e:
-			logger.error("manage gamepad loop went down with error:")
-			logger.error(e)
-
-
-			e_time = time.time()
-			if e_time < 10:
-				time.sleep(2)
+		e_time = time.time()
+		if e_time < 10:
+			time.sleep(2)
 
 		
