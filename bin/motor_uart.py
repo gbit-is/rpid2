@@ -62,13 +62,12 @@ def scan_uarts():
 	serial_devices_dir = "/dev/serial/by-id/"
 	all_serial_devices = os.listdir(serial_devices_dir)
 
-	all_serial_devices = ["/dev/serial/by-id/usb-Raspberry_Pi_Pico_E660A49317642B24-if02" ]
-
 	MCUS = { }
 	for device in all_serial_devices:
 		device_path = os.path.join(serial_devices_dir,device)
 		if any(sub in device_path for sub in MCU_PATTERNS):
 			UART = serial.Serial(device_path,9600,timeout=1)
+			time.sleep(0.1)
 			UART.write(b"whois\n")
 			res = UART.read(64)
 			res = res.decode()
