@@ -28,18 +28,24 @@ jdb = json_db()
 class motor_limits_class():
 
 	def __init__(self):
+		self.limits = { }
+		self.limits["drive"] = 0
+		self.limits["dome"] = 0
 		self.update()
 
 	def update(self):
-		self.limit = ( fetch_motor_val() / 100 )
+		limits = fetch_motor_val()
+		self.limits["drive"] = limits[0] / 100
+		self.limits["dome"] = limits[1] / 100
 
 
 
 def fetch_motor_val():
 
 	jdb.connection.sync()
-	val = jdb.get("motors","speed","limit","value")[1]
-	return val
+	drive = jdb.get("motors","speed","limit","value")[1]
+	dome = jdb.get("dome","speed","limit","value")[1]
+	return drive, dome
 
 def update_motor_val(interval):
 	while True:
@@ -58,28 +64,30 @@ def calculate_motors(direction,turn):
 	left_motor = ( max(-100, min(100, left_motor)) ) / 100
 	right_motor = ( max(-100, min(100, right_motor)) ) / 100
 
-	left_motor = left_motor * motor_limits.limit
-	right_motor = right_motor * motor_limits.limit
+	left_motor = left_motor * motor_limits.limits["drive"]
+	right_motor = right_motor * motor_limits.limits["drive"]
 
 	return left_motor, right_motor
 
 def send_drive_command(left_motor,right_motor):
 
-	msg = f"drive:{left_motor},{right_motor}\n"
-	print(msg)
 	if motor_controllers["legs"]["enabled"]:
+		msg = f"drive:{left_motor},{right_motor}\n"
 		motor_controllers["legs"]["uart"].write(msg)
+	else:
+		logger.info("Main drive disabled")
 	
-def send_dome_command(rotate,uart_interface):
+def send_dome_command(rotate):
 
-	rotate = str(round(float(rotate) / 100, 2))
-	
-
-	dome_msg = "drive," + rotate + "@"
-	uart_interface.write(dome_msg.encode())
+	if motor_controllers["dome"]["enabled"]:
+		rotate = float(rotate) * motor_limits.limits["dome"]
+		rotate = str(round(rotate / 100, 2))
+		dome_msg = f"drive:{rotate}\n"
+		motor_controllers["dome"]["uart"].write(dome_msg)
+	else:
+		logger.info("dome drive disabled")
 
 def parse_data(data):
-	#data = data.decode()
 
 	try:
 		if data.startswith("drive"):
@@ -93,19 +101,17 @@ def parse_data(data):
 			logger.debug("pong")
 			return
 		elif data.startswith("dome"):
-			if HAS_DOME_CONTROLLER:
-				data = data.split(",")
-				if data[1] == "rotate":
-					rotate = data[2]
-					send_dome_command(rotate,dome_motor_uart)
+			data = data.split(",")
+			if data[1] == "rotate":
+				rotate = data[2]
+				send_dome_command(rotate)
 			return
 	except Exception as e:
 		logger.error("ERROR OCCURED IN PARSING COMMAND !!!")
 		logger.error(e)
 		logger.error(data)
 		send_drive_command(0,0)
-		if HAS_DOME_CONTROLLER:
-			send_dome_command(0,dome_motor_uart)
+		send_dome_command(0)
 	
 
 
@@ -114,7 +120,7 @@ async def handler(ws):
 		async for msg in ws:       
 			parse_data(msg)
 	except ConnectionClosed:        
-		print("conn close")
+		logger.warning("conn close")
 
 async def main():
 	async with serve(handler, "", PORT) as server:
@@ -127,7 +133,9 @@ t.start()
 
 
 def init_controllers():
-	mcu_names = {'drive_controller': [{'version': 'v.0.9', 'id': '0123', 'path': '/dev/serial/by-id/usb-Raspberry_Pi_Pico_E660A49317642B24-if02'}]}
+	#mcu_names = {'drive_controller': [{'version': 'v.0.9', 'id': '0123', 'path': '/dev/serial/by-id/usb-Raspberry_Pi_Pico_E660A49317642B24-if02'}]}
+	mcu_names = {'dome_controller': [{'version': 'v.0.9', 'id': '0000', 'path': '/dev/serial/by-id/usb-Raspberry_Pi_Pico_E6616408436F8221-if02'}], 'drive_controller': [{'version': 'v.0.9', 'id': '0123', 'path': '/dev/serial/by-id/usb-Raspberry_Pi_Pico_E660A49317642B24-if02'}]}
+	#mcu_names = scan_uarts()
 	motor_controllers = { }
 
 	controllers = config["motor_controllers"]
@@ -156,6 +164,7 @@ def init_controllers():
 
 if __name__ == "__main__":
 		
+	logger.info("initialising controllers")
 	motor_controllers = init_controllers()
 	asyncio.run(main())
 
